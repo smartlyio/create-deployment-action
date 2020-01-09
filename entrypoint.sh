@@ -27,10 +27,9 @@ PAYLOAD=$(echo '{}' | \
     jq '.required_contexts = []' \
   )
 
-echo PAYLOAD
-
+echo $PAYLOAD
 DEPLOYMENTS_URL="https://api.github.com/repos/$GITHUB_REPOSITORY/deployments"
-DEPLOYMENT=$(curl --fail -s -S -H "Authorization: token $INPUT_GITHUB_TOKEN" --header "Content-Type: application/vnd.github.ant-man-preview+json" --data "$PAYLOAD" "$DEPLOYMENTS_URL")
+DEPLOYMENT=$(curl -H "Authorization: token $INPUT_GITHUB_TOKEN" --header "Content-Type: application/vnd.github.ant-man-preview+json" --data "$PAYLOAD" "$DEPLOYMENTS_URL")
 echo $DEPLOYMENT
 
 if [ "$INPUT_MARK_SUCCEEDED" = "true" ]; then
