@@ -1,15 +1,22 @@
-name: 'Hello World'
-description: 'Greet someone and record the time'
+name: 'Deployment and Link'
+description: 'Make a deployment with the Github Deployments API and link it to actual deployment.'
 inputs:
-  who-to-greet:  # id of input
-    description: 'Who to greet'
+  ENVIRONMENT_URL:
+    description: 'Link to put in deployment message'
     required: true
-    default: 'World'
-outputs:
-  time: # id of output
-    description: 'The time we greeted you'
+    default: ''
+  GITHUB_TOKEN:
+    description: Github authorization token
+    required: true
+    default: ''
+  DEPLOY_TYPE:
+    description: Type of deployment to pass to Github API
+    required: false
+    default: production
 runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
-    - ${{ inputs.who-to-greet }}
+    - ${{ inputs.ENVIRONMENT_URL }}
+    - ${{ inputs.GITHUB_TOKEN }}
+    - ${{ inputs.DEPLOY_TYPE }}
