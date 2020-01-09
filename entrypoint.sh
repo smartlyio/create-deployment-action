@@ -1,15 +1,21 @@
 #!/bin/sh -l
 
-if [[ "$INPUT_DEPLOY_TYPE" == "production" ]]; then
-    PRODUCTION_ENV=true
-    TRANSIENT_ENV=false
-elif [[ "$INPUT_DEPLOY_TYPE" == "PR" ]]; then
-    PRODUCTION_ENV=false
-    TRANSIENT_ENV=true
+# Check inputs
+if [ "$INPUT_DEPLOY_TYPE" = "production" ]; then
+  PRODUCTION_ENV=true
+  TRANSIENT_ENV=false
+elif [ "$INPUT_DEPLOY_TYPE" = "PR" ]; then
+  PRODUCTION_ENV=false
+  TRANSIENT_ENV=true
 else
-    echo "INVALID ENVIRONMENT"
-    echo "Allowed values are \"Production\" and \"PR\""
-    exit 1
+  echo "INVALID DEPLOY_TYPE"
+  echo "Allowed values are \"Production\" and \"PR\""
+  exit 1
+fi
+
+if [ -z "$INPUT_ENVIRONMENT_URL" ] || [ -z "$INPUT_GITHUB_TOKEN" ]; then
+  echo "Please specify both the github token and the deployed environment URL"
+  exit 1
 fi
 
 # Create deployment
@@ -24,10 +30,12 @@ DEPLOYMENTS_URL="https://api.github.com/repos/$GITHUB_REPOSITORY/deployments"
 DEPLOYMENT=$(curl --fail -s -S -H "Authorization: token $INPUT_GITHUB_TOKEN" --header "Content-Type: application/vnd.github.ant-man-preview+json" --data "$PAYLOAD" "$DEPLOYMENTS_URL")
 echo $DEPLOYMENT
 
-# Mark Deployment as successful
-STATUS_PAYLOAD=$(echo '{}' | \
-    jq --arg environment_url "$INPUT_ENVIRONMENT_URL" '.environment_url = $environment_url' | \
-    jq '.state = "success"'
-  )
-DEPLOYMENT_URL=$(echo $DEPLOYMENT | jq -r .url)
-curl --fail -s -S -H "Authorization: token $INPUT_GITHUB_TOKEN" --header "Content-Type: application/vnd.github.ant-man-preview+json" --data "$STATUS_PAYLOAD" "$DEPLOYMENT_URL/statuses" > /dev/null
+if [ "$INPUT_MARK_SUCCEEDED" = "true" ]; then
+  # Mark Deployment as successful
+  STATUS_PAYLOAD=$(echo '{}' | \
+      jq --arg environment_url "$INPUT_ENVIRONMENT_URL" '.environment_url = $environment_url' | \
+      jq '.state = "success"'
+    )
+  DEPLOYMENT_URL=$(echo $DEPLOYMENT | jq -r .url)
+  curl --fail -s -S -H "Authorization: token $INPUT_GITHUB_TOKEN" --header "Content-Type: application/vnd.github.ant-man-preview+json" --data "$STATUS_PAYLOAD" "$DEPLOYMENT_URL/statuses" > /dev/null
+fi

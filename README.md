@@ -1,23 +1,31 @@
-# Hello world docker action
+# Create Github Deployment action
 
-This action prints "Hello World" to the log or "Hello" + the name of a person to greet. To learn how this action was built, see "[Creating a Docker container action](https://help.github.com/en/articles/creating-a-docker-container-action)" in the GitHub Help documentation.
+Creates a deployment throught the Github Deployments API
 
 ## Inputs
 
-### `who-to-greet`
+### `ENVIRONMENT_URL`
 
-**Required** The name of the person to greet. Default `"World"`.
+**Required** Link to put in deployment message.
 
-## Outputs
+### `GITHUB_TOKEN`
 
-### `time`
+**Required** Github authorization token.
 
-The time we greeted you.
+### `MARK_SUCCEEDED`
+
+Should this deployment also be marked as complete/successful? Default `true`.
+
+### `DEPLOY_TYPE`
+
+Type of deployment to pass to Github API. Accepted values: `"production"`,`"PR"` Default `"production"`.
 
 ## Example usage
 
 ```yaml
-uses: actions/hello-world-docker-action@master
-with:
-  who-to-greet: 'Mona the Octocat'
+- uses: smartlyio/create-deployment-action@master
+  with:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    ENVIRONMENT_URL: "https://here.is.deployment/index.html"
+    DEPLOY_TYPE: "PR"
 ```
