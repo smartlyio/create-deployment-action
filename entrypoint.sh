@@ -21,8 +21,9 @@ fi
 # Create deployment
 PAYLOAD=$(echo '{}' | \
     jq --arg ref "$GITHUB_HEAD_REF" '.ref = $ref' | \
-    jq --arg transient_environment "$TRANSIENT_ENV" '.transient_environment = $transient_environment' | \
-    jq --arg production_environment "$PRODUCTION_ENV" '.production_environment = $production_environment' | \
+    jq --arg environment "$INPUT_DEPLOY_TYPE" '.environment = $environment' | \
+    jq --argjson transient_environment "$TRANSIENT_ENV" '.transient_environment = $transient_environment' | \
+    jq --argjson production_environment "$PRODUCTION_ENV" '.production_environment = $production_environment' | \
     jq '.auto_merge = false' | \
     jq '.required_contexts = []' \
   )
