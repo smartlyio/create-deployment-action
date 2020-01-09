@@ -1,27 +1,25 @@
 name: 'Deployment and Link'
 description: 'Make a deployment with the Github Deployments API and link it to actual deployment.'
 inputs:
-  ENVIRONMENT_URL:
-    description: 'Link to put in deployment message.'
-    required: true
-    default: ''
   GITHUB_TOKEN:
     description: 'Github authorization token.'
     required: true
-    default: ''
+  ENVIRONMENT_URL:
+    description: 'Link to put in deployment message.'
+    required: true
+  ENVIRONMENT_NAME:
+    description: 'Name of deployment environment to pass to Github API.'
+    required: false
+    default: production
   MARK_SUCCEEDED:
     description: 'Should this deployment also be marked as complete/successful.'
     required: false
-    default: true
-  DEPLOY_TYPE:
-    description: 'Type of deployment to pass to Github API. Accepted Values: production, PR'
-    required: false
-    default: production
+    default: false
 runs:
   using: 'docker'
   image: 'Dockerfile'
   args:
-    - ${{ inputs.ENVIRONMENT_URL }}
     - ${{ inputs.GITHUB_TOKEN }}
+    - ${{ inputs.ENVIRONMENT_URL }}
+    - ${{ inputs.ENVIRONMENT_NAME }}
     - ${{ inputs.MARK_SUCCEEDED }}
-    - ${{ inputs.DEPLOY_TYPE }}
