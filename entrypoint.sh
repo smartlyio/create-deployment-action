@@ -18,7 +18,7 @@ fi
 
 # Create deployment
 PAYLOAD=$(echo '{}' | \
-    jq --arg ref "$GITHUB_HEAD_REF" '.ref = $ref' | \
+    jq --arg ref "$GITHUB_REF" '.ref = $ref' | \
     jq --arg environment "$INPUT_ENVIRONMENT_NAME" '.environment = $environment' | \
     jq --argjson transient_environment "$TRANSIENT_ENV" '.transient_environment = $transient_environment' | \
     jq --argjson production_environment "$PRODUCTION_ENV" '.production_environment = $production_environment' | \
@@ -26,7 +26,7 @@ PAYLOAD=$(echo '{}' | \
     jq '.required_contexts = []' \
   )
 DEPLOYMENTS_URL="https://api.github.com/repos/$GITHUB_REPOSITORY/deployments"
-DEPLOYMENT=$(curl -H "Authorization: token $INPUT_GITHUB_TOKEN" --header "Content-Type: application/vnd.github.ant-man-preview+json" --data "$PAYLOAD" "$DEPLOYMENTS_URL")
+DEPLOYMENT=$(curl --fail -s -S -H "Authorization: token $INPUT_GITHUB_TOKEN" --header "Content-Type: application/vnd.github.ant-man-preview+json" --data "$PAYLOAD" "$DEPLOYMENTS_URL")
 echo $DEPLOYMENT
 
 # Mark Deployment as successful
