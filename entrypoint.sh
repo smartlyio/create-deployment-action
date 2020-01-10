@@ -2,12 +2,15 @@
 
 # production_env is set by default but transient env is not
 # Setting these explicitly since they're preview features and we want to be sure of behaviour
+# Small hack since pointing at the github ref on master merge causes issues when there is a deleted branch
 if [ "$INPUT_ENVIRONMENT_NAME" = "production" ]; then
   PRODUCTION_ENV=true
   TRANSIENT_ENV=false
+  TARGET_REF=master
 else
   PRODUCTION_ENV=false
   TRANSIENT_ENV=true
+  TARGET_REF="$GITHUB_REF"
 fi
 
 # Check inputs
@@ -18,7 +21,7 @@ fi
 
 # Create deployment
 PAYLOAD=$(echo '{}' | \
-    jq --arg ref "$GITHUB_REF" '.ref = $ref' | \
+    jq --arg ref "$TARGET_REF" '.ref = $ref' | \
     jq --arg environment "$INPUT_ENVIRONMENT_NAME" '.environment = $environment' | \
     jq --argjson transient_environment "$TRANSIENT_ENV" '.transient_environment = $transient_environment' | \
     jq --argjson production_environment "$PRODUCTION_ENV" '.production_environment = $production_environment' | \
