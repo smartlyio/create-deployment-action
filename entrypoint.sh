@@ -10,7 +10,7 @@ if [ "$INPUT_ENVIRONMENT_NAME" = "production" ]; then
 else
   PRODUCTION_ENV=false
   TRANSIENT_ENV=true
-  TARGET_REF="$GITHUB_REF"
+  TARGET_REF="$GITHUB_HEAD_REF"
 fi
 
 # Check inputs
