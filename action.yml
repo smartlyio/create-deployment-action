@@ -11,6 +11,10 @@ inputs:
     description: 'Name of deployment environment to pass to Github API.'
     required: false
     default: production
+  DESCRIPTION:
+    description: 'Deployment description to pass to Github API.'
+    required: false
+    default: ''
   MARK_SUCCEEDED:
     description: 'Should this deployment also be marked as complete/successful.'
     required: false
@@ -22,4 +26,5 @@ runs:
     - ${{ inputs.GITHUB_TOKEN }}
     - ${{ inputs.ENVIRONMENT_URL }}
     - ${{ inputs.ENVIRONMENT_NAME }}
+    - ${{ inputs.DESCRIPTION }}
     - ${{ inputs.MARK_SUCCEEDED }}

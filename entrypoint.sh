@@ -23,6 +23,7 @@ fi
 PAYLOAD=$(echo '{}' | \
     jq --arg ref "$TARGET_REF" '.ref = $ref' | \
     jq --arg environment "$INPUT_ENVIRONMENT_NAME" '.environment = $environment' | \
+    jq --arg description "$INPUT_DESCRIPTION" '.description = $description' | \
     jq --argjson transient_environment "$TRANSIENT_ENV" '.transient_environment = $transient_environment' | \
     jq --argjson production_environment "$PRODUCTION_ENV" '.production_environment = $production_environment' | \
     jq '.auto_merge = false' | \
