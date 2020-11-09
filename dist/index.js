@@ -5488,7 +5488,7 @@ function getContext() {
         }
         const context = {
             executionStage: stage,
-            token: core.getInput('github_token', { required: true }),
+            token: core.getInput('token', { required: true }),
             jobStatus: core.getInput('job_status', { required: true }),
             requiredContexts: parseArray(requiredContexts),
             repo,
