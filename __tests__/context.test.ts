@@ -146,7 +146,7 @@ describe('context', () => {
           return environment
         case 'environment_url':
           return environmentUrl
-        case 'github_token':
+        case 'token':
           return token
         case 'job_status':
           return jobStatus
