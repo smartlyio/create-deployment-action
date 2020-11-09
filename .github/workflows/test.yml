@@ -1,6 +1,8 @@
 name: 'build-test'
 on: # rebuild any PRs and main branch changes
   pull_request:
+    branches:
+      - master
   push:
     branches:
       - master
@@ -10,20 +12,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-    - name: "Install"
-      run: |
-        npm install
-    - name: "Run build"
-      run: |
-        npm run all
-    - name: "Run tests"
-      run: |
-        npm run test
-    - name: "Verify artefacts are up to date in the repository"
-      run: |
-        # Error if there are changes after the build
-        if [ "$(git status --porcelain | wc -c)" -gt "0" ]; then
-            echo "Built artefacts (dist/*) were not updated by the pull request."
-            echo "Run `npm run-script package` and commit the changes."
-            exit 1
-        fi
+      - name: "Install"
+        run: |
+          npm install
+      - name: "Run build"
+        run: |
+          npm run all
+      - name: "Run tests"
+        run: |
+          npm run test
+      - name: "Verify artefacts are up to date in the repository"
+        run: |
+          # Error if there are changes after the build
+          if [ "$(git status --porcelain | wc -c)" -gt "0" ]; then
+              echo "Built artefacts (dist/*) were not updated by the pull request."
+              echo "Run `npm run-script package` and commit the changes."
+              exit 1
+          fi
