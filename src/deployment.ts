@@ -1,12 +1,18 @@
 import * as github from '@actions/github'
-import {Context} from './context'
+import {Context, saveExecutionState} from './context'
 
-const inProgressMediatype = 'application/vnd.github.flash-preview+json'
-const mediatype = 'application/vnd.github.ant-man-preview+json'
+export const githubPreviews = [
+  'flash', // More deployment statuses
+  'ant-man' // Allow environment_url paramater
+]
 
 export async function createDeployment(context: Context): Promise<void> {
   const octokit = github.getOctokit(context.token)
-  await octokit.createDeployment({
+  const options: Record<string, string> = {}
+  if (context.version) {
+    options.version = context.version
+  }
+  const deployment = await octokit.createDeployment({
     owner: context.repoOwner,
     repo: context.repoName,
     ref: context.ref,
@@ -14,45 +20,44 @@ export async function createDeployment(context: Context): Promise<void> {
     production_environment: context.environment.isProduction,
     required_contexts: context.requiredContexts,
     auto_merge: false,
-    payload: {
-      version: context.version
-    },
     mediaType: {
-      format: mediatype
-    }
+      previews: githubPreviews
+    },
+    ...options
   })
+  context.deploymentId = deployment.id
+  saveExecutionState(context)
 }
 
 export async function setDeploymentInProgress(context: Context): Promise<void> {
   const octokit = github.getOctokit(context.token)
-  await octokit.createDeployment({
+  await octokit.createDeploymentStatus({
     owner: context.repoOwner,
     repo: context.repoName,
     deployment_id: context.deploymentId,
     state: 'in_progress',
     mediaType: {
-      format: inProgressMediatype
+      previews: githubPreviews
     }
   })
 }
 
-export async function setDeploymentEnded(
-  context: Context,
-  success: boolean
-): Promise<void> {
+export async function setDeploymentEnded(context: Context): Promise<void> {
   const octokit = github.getOctokit(context.token)
-  const state = success ? 'success' : 'failure'
+  const state = ['success', 'failure'].includes(context.jobStatus)
+    ? context.jobStatus
+    : 'error'
   const options: Record<string, string> = {}
   if (context.environment.url) {
     options.environment_url = context.environment.url
   }
-  await octokit.createDeployment({
+  await octokit.createDeploymentStatus({
     owner: context.repoOwner,
     repo: context.repoName,
     deployment_id: context.deploymentId,
     state,
     mediaType: {
-      format: mediatype
+      previews: githubPreviews
     },
     ...options
   })
