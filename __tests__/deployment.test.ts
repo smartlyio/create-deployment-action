@@ -51,28 +51,34 @@ describe('pre-build stage', () => {
       url: 'https://example.com',
       isProduction: true,
       isTransient: false
-    },
+    }
   }
   test('create deployment', async () => {
     const deploymentId = 27
     const scope = nock(GITHUB_API)
-      .post(`/repos/${context.repo.owner}/${context.repo.name}/deployments`, body => {
-        return (
-          body.ref === context.ref &&
+      .post(
+        `/repos/${context.repo.owner}/${context.repo.name}/deployments`,
+        body => {
+          return (
+            body.ref === context.ref &&
             body.environment === context.environment.name &&
             body.transient_environment === context.environment.isTransient &&
             body.production_environment === context.environment.isProduction &&
             body.auto_merge === false &&
             body.payload.version === context.version
-        )
-      })
+          )
+        }
+      )
       .reply(200, {id: deploymentId})
     const mockSaveState = mocked(saveState)
     await createDeployment(context)
 
     expect(mockSaveState).toHaveBeenCalledTimes(2)
     expect(mockSaveState).toHaveBeenCalledWith(PRE_HAS_RUN, 'true')
-    expect(mockSaveState).toHaveBeenCalledWith(DEPLOYMENT_ID, JSON.stringify(deploymentId))
+    expect(mockSaveState).toHaveBeenCalledWith(
+      DEPLOYMENT_ID,
+      JSON.stringify(deploymentId)
+    )
     scope.done()
   })
 })
@@ -95,14 +101,17 @@ describe('main build stage', () => {
       url: 'https://example.com',
       isProduction: true,
       isTransient: false
-    },
+    }
   }
   test('set status in progress deployment', async () => {
     const deploymentId = 27
     const scope = nock(GITHUB_API)
-      .post(`/repos/${context.repo.owner}/${context.repo.name}/deployments/${context.deploymentId}/statuses`, body => {
-        return body.state === 'in_progress'
-      })
+      .post(
+        `/repos/${context.repo.owner}/${context.repo.name}/deployments/${context.deploymentId}/statuses`,
+        body => {
+          return body.state === 'in_progress'
+        }
+      )
       .reply(200)
     const mockSaveState = mocked(saveState)
     await setDeploymentInProgress(context)
@@ -129,19 +138,22 @@ describe('post build stage', () => {
       name: 'production',
       isProduction: true,
       isTransient: false
-    },
+    }
   }
 
   test('set environment url and status success', async () => {
     const deploymentId = 27
     context.environment.url = 'https://example.com'
     const scope = nock(GITHUB_API)
-      .post(`/repos/${context.repo.owner}/${context.repo.name}/deployments/${context.deploymentId}/statuses`, body => {
-        return (
-          body.state === 'success' &&
+      .post(
+        `/repos/${context.repo.owner}/${context.repo.name}/deployments/${context.deploymentId}/statuses`,
+        body => {
+          return (
+            body.state === 'success' &&
             body.environment_url === context.environment.url
-        )
-      })
+          )
+        }
+      )
       .reply(200)
     const mockSaveState = mocked(saveState)
     await setDeploymentEnded(context)
@@ -154,12 +166,15 @@ describe('post build stage', () => {
     const deploymentId = 27
     context.jobStatus = 'failure'
     const scope = nock(GITHUB_API)
-      .post(`/repos/${context.repo.owner}/${context.repo.name}/deployments/${context.deploymentId}/statuses`, body => {
-        return (
-          body.state === 'failure' &&
+      .post(
+        `/repos/${context.repo.owner}/${context.repo.name}/deployments/${context.deploymentId}/statuses`,
+        body => {
+          return (
+            body.state === 'failure' &&
             body.environment_url === context.environment.url
-        )
-      })
+          )
+        }
+      )
       .reply(200)
     const mockSaveState = mocked(saveState)
     await setDeploymentEnded(context)
@@ -172,12 +187,15 @@ describe('post build stage', () => {
     const deploymentId = 27
     context.jobStatus = 'cancelled'
     const scope = nock(GITHUB_API)
-      .post(`/repos/${context.repo.owner}/${context.repo.name}/deployments/${context.deploymentId}/statuses`, body => {
-        return (
-          body.state === 'error' &&
+      .post(
+        `/repos/${context.repo.owner}/${context.repo.name}/deployments/${context.deploymentId}/statuses`,
+        body => {
+          return (
+            body.state === 'error' &&
             body.environment_url === context.environment.url
-        )
-      })
+          )
+        }
+      )
       .reply(200)
     const mockSaveState = mocked(saveState)
     await setDeploymentEnded(context)

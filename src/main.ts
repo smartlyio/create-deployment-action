@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import {Context, getContext, saveExecutionState} from './context'
+import {Context, getContext} from './context'
 import {
   createDeployment,
   setDeploymentInProgress,

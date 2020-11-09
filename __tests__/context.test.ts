@@ -8,24 +8,24 @@ import {
   MAIN_HAS_RUN,
   DEPLOYMENT_ID
 } from '../src/context'
-import {mocked} from 'ts-jest/utils';
-import {getInput, saveState, getState, info} from '@actions/core';
+import {mocked} from 'ts-jest/utils'
+import {getInput, saveState, getState, info} from '@actions/core'
 
 jest.mock('@actions/core', () => ({
   getInput: jest.fn(),
   saveState: jest.fn(),
   getState: jest.fn(),
   info: jest.fn()
-}));
+}))
 
-const OLD_ENV = process.env;
+const OLD_ENV = process.env
 beforeEach(() => {
-  process.env = {...OLD_ENV};
-});
+  process.env = {...OLD_ENV}
+})
 
 afterEach(() => {
-  process.env = OLD_ENV;
-});
+  process.env = OLD_ENV
+})
 
 describe('executionStage', () => {
   test('return pre if no stages have completed yet', () => {
@@ -63,14 +63,14 @@ describe('saveExecutionState', () => {
     jobStatus: 'success',
     repo: {
       owner: '',
-      name: '',
+      name: ''
     },
     environment: {
       name: '',
       url: '',
       isProduction: false,
       isTransient: true
-    },
+    }
   }
   it('should save the execution stage in pre execution', async () => {
     const mockSaveState = mocked(saveState)
@@ -118,7 +118,9 @@ describe('context', () => {
 
   test('no repository inputs', async () => {
     delete process.env[`GITHUB_REPOSITORY`]
-    await expect(getContext()).rejects.toThrow(/Unexpectedly missing.*GITHUB_REPOSITORY/)
+    await expect(getContext()).rejects.toThrow(
+      /Unexpectedly missing.*GITHUB_REPOSITORY/
+    )
   })
 
   test('no ref inputs', async () => {
@@ -156,19 +158,21 @@ describe('context', () => {
     })
 
     const context = await getContext()
-    expect(context).toEqual(expect.objectContaining({
-      executionStage: 'pre',
-      token,
-      environment: expect.objectContaining({
-        name: environment,
-        url: environmentUrl,
-        isProduction: true,
-        isTransient: false
-      }),
-      requiredContexts: [],
-      ref,
-      version,
-      jobStatus
-    }))
+    expect(context).toEqual(
+      expect.objectContaining({
+        executionStage: 'pre',
+        token,
+        environment: expect.objectContaining({
+          name: environment,
+          url: environmentUrl,
+          isProduction: true,
+          isTransient: false
+        }),
+        requiredContexts: [],
+        ref,
+        version,
+        jobStatus
+      })
+    )
   })
 })
