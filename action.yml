@@ -12,8 +12,9 @@ inputs:
     description: 'The github ref being deployed. Can be branch, tag, commit, etc.'
     required: false
   version:
-    description: 'The version being deployed (e.g. the the tag, if ref is passed as a branch) [Optional]'
+    description: 'The version being deployed (for disply purposes only)'
     required: false
+    default: ${{ github.sha }}
 
   required_contexts:
     description: |
