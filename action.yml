@@ -5,8 +5,9 @@ inputs:
     description: 'Github access token'
     required: true
   job_status:
-    description: 'Current job status.  Should be passed as the job.status github context.'
-    required: true
+    description: 'Current job status. Should never be passed; the default should be used.'
+    required: false
+    default: ${{ job.status }}
   ref:
     description: 'The github ref being deployed. Can be branch, tag, commit, etc.'
     required: false
