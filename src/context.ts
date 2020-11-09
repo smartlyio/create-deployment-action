@@ -29,6 +29,11 @@ export function saveExecutionState(context: Context): void {
   }
 }
 
+export interface Repository {
+  owner: string
+  name: string
+}
+
 export interface Environment {
   name: string
   isProduction: boolean
@@ -36,16 +41,24 @@ export interface Environment {
   url?: string
 }
 
+export declare type JobStatus =
+  | 'error'
+  | 'failure'
+  | 'inactive'
+  | 'in_progress'
+  | 'queued'
+  | 'pending'
+  | 'success'
+
 export interface Context {
   executionStage: string
   token: string
   jobStatus: string
   environment: Environment
-  repoOwner: string
-  repoName: string
+  repo: Repository
   ref: string
   version?: string
-  requiredContexts: string[] | null
+  requiredContexts: string[]
   deploymentId?: number
 }
 
@@ -69,6 +82,10 @@ export async function getContext(): Promise<Context> {
     throw new Error('Unexpectedly missing Github context GITHUB_REPOSITORY!')
   }
   const [repoOwner, repoName] = githubRepository.split('/')
+  const repo: Repository = {
+    owner: repoOwner,
+    name: repoName
+  }
 
   const ref: string | undefined =
     core.getInput('ref') || process.env['GITHUB_REF']
@@ -99,8 +116,7 @@ export async function getContext(): Promise<Context> {
     token: core.getInput('github_token', {required: true}),
     jobStatus: core.getInput('job_status', {required: true}),
     requiredContexts: parseArray(requiredContexts),
-    repoOwner,
-    repoName,
+    repo,
     ref,
     environment
   }

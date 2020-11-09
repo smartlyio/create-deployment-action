@@ -57,12 +57,14 @@ describe('saveExecutionState', () => {
   const context: Context = {
     executionStage: 'pre',
     token: '',
-    repoOwner: '',
-    repoName: '',
     ref: '',
     version: '',
     requiredContexts: [],
-    jobStatus: '',
+    jobStatus: 'success',
+    repo: {
+      owner: '',
+      name: '',
+    },
     environment: {
       name: '',
       url: '',
