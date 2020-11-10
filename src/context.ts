@@ -146,6 +146,5 @@ export async function getContext(): Promise<Context> {
     context.deploymentId = parseInt(deploymentId)
   }
 
-  saveExecutionState(context)
   return context
 }
