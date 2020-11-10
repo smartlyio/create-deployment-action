@@ -100,7 +100,10 @@ export async function getContext(): Promise<Context> {
   const requiredContexts = core.getInput('required_contexts') || ''
 
   const environmentName: string = core.getInput('environment_name')
-  const isProduction: boolean = environmentName === 'production'
+  const isProduction: boolean =
+    toBoolean(core.getInput('is_production')) ||
+    environmentName === 'production' ||
+    !!environmentName.match(/^kube-prod\d+$/)
   const environmentUrl: string = core.getInput('environment_url')
   const environment: Environment = {
     name: environmentName,

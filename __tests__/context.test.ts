@@ -175,4 +175,78 @@ describe('context', () => {
       })
     )
   })
+
+  test('kube-prodN is production', async () => {
+    const mockGetInput = mocked(getInput)
+    const environment = 'kube-prod5'
+    mockGetInput.mockImplementation((name: string): string => {
+      switch (name) {
+        case 'environment_name':
+          return environment
+        default:
+          return ''
+      }
+    })
+
+    const context = await getContext()
+    expect(context).toEqual(
+      expect.objectContaining({
+        environment: expect.objectContaining({
+          name: environment,
+          isProduction: true,
+          isTransient: false
+        })
+      })
+    )
+  })
+
+  test('is_production input overrides default', async () => {
+    const mockGetInput = mocked(getInput)
+    const environment = 'dev'
+    mockGetInput.mockImplementation((name: string): string => {
+      switch (name) {
+        case 'environment_name':
+          return environment
+        case 'is_production':
+          return 'true'
+        default:
+          return ''
+      }
+    })
+
+    const context = await getContext()
+    expect(context).toEqual(
+      expect.objectContaining({
+        environment: expect.objectContaining({
+          name: environment,
+          isProduction: true,
+          isTransient: false
+        })
+      })
+    )
+  })
+
+  test('default is_production when not prod', async () => {
+    const mockGetInput = mocked(getInput)
+    const environment = 'dev'
+    mockGetInput.mockImplementation((name: string): string => {
+      switch (name) {
+        case 'environment_name':
+          return environment
+        default:
+          return ''
+      }
+    })
+
+    const context = await getContext()
+    expect(context).toEqual(
+      expect.objectContaining({
+        environment: expect.objectContaining({
+          name: environment,
+          isProduction: false,
+          isTransient: true
+        })
+      })
+    )
+  })
 })

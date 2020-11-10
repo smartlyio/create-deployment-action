@@ -1,11 +1,14 @@
 name: 'Deployment and Link'
-description: 'Make a deployment with the Github Deployments API and link it to actual deployment.'
+description: >-
+  Make a deployment with the Github Deployments API and link it to
+  actual deployment.
 inputs:
   token:
     description: 'Github access token'
     required: true
   job_status:
-    description: 'Current job status. Should never be passed; the default should be used.'
+    description: >-
+      Current job status. Should never be passed; the default should be used.
     required: false
     default: ${{ job.status }}
   ref:
@@ -17,7 +20,7 @@ inputs:
     default: ${{ github.sha }}
 
   required_contexts:
-    description: |
+    description: >-
       Comma-separated list of required status checks for this
       deployment. Default: No checks are required.
     required: false
@@ -29,6 +32,13 @@ inputs:
     description: 'Name of deployment environment to pass to Github API.'
     required: false
     default: production
+  is_production:
+    description: >-
+      Is the environment being deployed a production environment?
+      Default depends on the environment_name input:
+        - production = true
+        - /^kube-prod\d+$/ = true
+    required: false
 runs:
   using: 'node12'
   pre: 'dist/index.js'
