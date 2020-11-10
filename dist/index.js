@@ -1423,33 +1423,68 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.runPost = exports.runMain = exports.runPre = void 0;
 const core = __importStar(__webpack_require__(186));
 const context_1 = __webpack_require__(842);
 const deployment_1 = __webpack_require__(900);
-function run() {
+function runPre() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            core.info(`Executing action pre-run stage`);
             const context = yield context_1.getContext();
-            switch (context.executionStage) {
-                case 'pre':
-                    yield deployment_1.createDeployment(context);
-                    break;
-                case 'main':
-                    yield deployment_1.setDeploymentInProgress(context);
-                    break;
-                case 'post':
-                    yield deployment_1.setDeploymentEnded(context);
-                    break;
-                default:
-                    throw new Error(`Unexpected execution stage ${context.executionStage}`);
+            if (context.executionStage !== 'pre') {
+                // This could happen if there is an error creating the deployment, and state is not saved.
+                throw new Error(`Unexpected execution stage "${context.executionStage}" when executing pre stage.`);
             }
+            yield deployment_1.createDeployment(context);
+            context_1.saveExecutionState(context);
         }
         catch (error) {
+            core.error(error.message);
             core.setFailed(error.message);
         }
     });
 }
-run();
+exports.runPre = runPre;
+function runMain() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            core.info(`Executing action main stage`);
+            const context = yield context_1.getContext();
+            if (context.executionStage !== 'main') {
+                throw new Error(`Unexpected execution stage "${context.executionStage}" when executing main stage`);
+            }
+            yield deployment_1.setDeploymentInProgress(context);
+            context_1.saveExecutionState(context);
+        }
+        catch (error) {
+            core.error(error.message);
+            core.setFailed(error.message);
+        }
+    });
+}
+exports.runMain = runMain;
+function runPost() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            core.info(`Executing action post-run stage`);
+            const context = yield context_1.getContext();
+            if (context.executionStage !== 'post') {
+                // This will happen if the 'main' stage was skipped, e.g. due to
+                // an `if:` condition in the workflow.
+                context.jobStatus = 'inactive';
+                core.warning('Action main stage not detected to have run. Deploy status set to "inactive"');
+            }
+            yield deployment_1.setDeploymentEnded(context);
+            context_1.saveExecutionState(context);
+        }
+        catch (error) {
+            core.error(error.message);
+            core.setFailed(error.message);
+        }
+    });
+}
+exports.runPost = runPost;
 
 
 /***/ }),
@@ -5513,7 +5548,6 @@ function getContext() {
         if (deploymentId) {
             context.deploymentId = parseInt(deploymentId);
         }
-        saveExecutionState(context);
         return context;
     });
 }
@@ -5565,6 +5599,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.setDeploymentEnded = exports.setDeploymentInProgress = exports.setDeploymentLogUrl = exports.createDeployment = exports.githubPreviews = void 0;
+const core = __importStar(__webpack_require__(186));
 const github = __importStar(__webpack_require__(438));
 const context_1 = __webpack_require__(842);
 exports.githubPreviews = [
@@ -5580,6 +5615,7 @@ function createDeployment(context) {
                 version: context.version
             };
         }
+        core.info('Creating new deployment');
         const deployment = (yield octokit.repos.createDeployment(Object.assign({ owner: context.repo.owner, repo: context.repo.name, ref: context.ref, environment: context.environment.name, transient_environment: context.environment.isTransient, production_environment: context.environment.isProduction, required_contexts: context.requiredContexts, auto_merge: false, mediaType: {
                 previews: exports.githubPreviews
             } }, options)));
@@ -5595,6 +5631,7 @@ function setDeploymentLogUrl(context) {
         if (!context.deploymentId) {
             throw new Error('Deployment ID not available to set deployment status. This is a bug in the action!');
         }
+        core.info('Setting deployment log url');
         yield octokit.repos.createDeploymentStatus({
             owner: context.repo.owner,
             repo: context.repo.name,
@@ -5614,6 +5651,7 @@ function setDeploymentInProgress(context) {
         if (!context.deploymentId) {
             throw new Error('Deployment ID not available to set deployment status. This is a bug in the action!');
         }
+        core.info('Setting deployment status to in_progress');
         yield octokit.repos.createDeploymentStatus({
             owner: context.repo.owner,
             repo: context.repo.name,
@@ -5632,13 +5670,15 @@ function setDeploymentEnded(context) {
         if (!context.deploymentId) {
             throw new Error('Deployment ID not available to set deployment status. This is a bug in the action!');
         }
-        const state = ['success', 'failure'].includes(context.jobStatus)
+        const validJobStatus = ['success', 'failure', 'inactive'].includes(context.jobStatus);
+        const state = validJobStatus
             ? context.jobStatus
             : 'error';
         const options = {};
         if (context.environment.url) {
             options.environment_url = context.environment.url;
         }
+        core.info(`Setting deployment status to ${state}`);
         yield octokit.repos.createDeploymentStatus(Object.assign({ owner: context.repo.owner, repo: context.repo.name, deployment_id: context.deploymentId, state, mediaType: {
                 previews: exports.githubPreviews
             } }, options));
