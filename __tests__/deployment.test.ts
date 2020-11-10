@@ -42,7 +42,7 @@ describe('pre-build stage', () => {
     version: 'v1.2.3',
     requiredContexts: [],
     jobStatus: 'success',
-    logUrl: '',
+    logUrl: 'https://example.com/logs',
     repo: {
       owner: 'smartlyio',
       name: 'ci-sla'
@@ -54,9 +54,9 @@ describe('pre-build stage', () => {
       isTransient: false
     }
   }
-  test('create deployment', async () => {
+  test('create deployment and set log URL', async () => {
     const deploymentId = 27
-    const scope = nock(GITHUB_API)
+    const deploymentsScope = nock(GITHUB_API)
       .post(
         `/repos/${context.repo.owner}/${context.repo.name}/deployments`,
         body => {
@@ -71,6 +71,17 @@ describe('pre-build stage', () => {
         }
       )
       .reply(200, {id: deploymentId})
+    const statusScope = nock(GITHUB_API)
+      .post(
+        `/repos/${context.repo.owner}/${context.repo.name}/deployments/${deploymentId}/statuses`,
+        body => {
+          return (
+            body.state === 'pending' &&
+              body.log_url === context.logUrl
+          )
+        }
+      )
+      .reply(200)
     const mockSaveState = mocked(saveState)
     await createDeployment(context)
 
@@ -80,7 +91,8 @@ describe('pre-build stage', () => {
       DEPLOYMENT_ID,
       JSON.stringify(deploymentId)
     )
-    scope.done()
+    deploymentsScope.done()
+    statusScope.done()
   })
 })
 

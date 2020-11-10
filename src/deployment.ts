@@ -34,6 +34,26 @@ export async function createDeployment(context: Context): Promise<void> {
   })) as OctokitResponse<ReposCreateDeploymentResponseData>
   context.deploymentId = deployment.data.id
   saveExecutionState(context)
+  await setDeploymentLogUrl(context)
+}
+
+export async function setDeploymentLogUrl(context: Context): Promise<void> {
+  const octokit = github.getOctokit(context.token)
+  if (!context.deploymentId) {
+    throw new Error(
+      'Deployment ID not available to set deployment status. This is a bug in the action!'
+    )
+  }
+  await octokit.repos.createDeploymentStatus({
+    owner: context.repo.owner,
+    repo: context.repo.name,
+    deployment_id: context.deploymentId,
+    state: 'pending',
+    log_url: context.logUrl,
+    mediaType: {
+      previews: githubPreviews
+    }
+  })
 }
 
 export async function setDeploymentInProgress(context: Context): Promise<void> {
