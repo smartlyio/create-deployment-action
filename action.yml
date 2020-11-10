@@ -1,25 +1,36 @@
 name: 'Deployment and Link'
 description: 'Make a deployment with the Github Deployments API and link it to actual deployment.'
 inputs:
-  GITHUB_TOKEN:
-    description: 'Github authorization token.'
+  token:
+    description: 'Github access token'
     required: true
-  ENVIRONMENT_URL:
+  job_status:
+    description: 'Current job status. Should never be passed; the default should be used.'
+    required: false
+    default: ${{ job.status }}
+  ref:
+    description: 'The github ref being deployed. Can be branch, tag, commit, etc.'
+    required: false
+  version:
+    description: 'The version being deployed (for disply purposes only)'
+    required: false
+    default: ${{ github.sha }}
+
+  required_contexts:
+    description: |
+      Comma-separated list of required status checks for this
+      deployment. Default: No checks are required.
+    required: false
+
+  environment_url:
     description: 'Link to put in deployment message.'
-    required: true
-  ENVIRONMENT_NAME:
+    required: false
+  environment_name:
     description: 'Name of deployment environment to pass to Github API.'
     required: false
     default: production
-  MARK_SUCCEEDED:
-    description: 'Should this deployment also be marked as complete/successful.'
-    required: false
-    default: false
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
-  args:
-    - ${{ inputs.GITHUB_TOKEN }}
-    - ${{ inputs.ENVIRONMENT_URL }}
-    - ${{ inputs.ENVIRONMENT_NAME }}
-    - ${{ inputs.MARK_SUCCEEDED }}
+  using: 'node12'
+  pre: 'dist/index.js'
+  main: 'dist/index.js'
+  post: 'dist/index.js'
