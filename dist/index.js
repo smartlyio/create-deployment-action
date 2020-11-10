@@ -5412,11 +5412,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getContext = exports.parseArray = exports.toBoolean = exports.saveExecutionState = exports.executionStage = exports.DEPLOYMENT_ID = exports.MAIN_HAS_RUN = exports.PRE_HAS_RUN = void 0;
+exports.getContext = exports.parseArray = exports.toBoolean = exports.saveExecutionState = exports.executionStage = exports.createLogUrl = exports.DEPLOYMENT_ID = exports.MAIN_HAS_RUN = exports.PRE_HAS_RUN = void 0;
 const core = __importStar(__webpack_require__(186));
 exports.PRE_HAS_RUN = 'preHasRun';
 exports.MAIN_HAS_RUN = 'mainHasRun';
 exports.DEPLOYMENT_ID = 'deploymentId';
+function createLogUrl(githubRepository, githubRunId) {
+    return `https://github.com/${githubRepository}/actions/runs/${githubRunId}`;
+}
+exports.createLogUrl = createLogUrl;
 function executionStage() {
     const isMain = !!process.env[`STATE_${exports.PRE_HAS_RUN}`];
     const isPost = !!process.env[`STATE_${exports.MAIN_HAS_RUN}`];
@@ -5460,23 +5464,30 @@ function getContext() {
     return __awaiter(this, void 0, void 0, function* () {
         const stage = executionStage();
         const githubRepository = process.env['GITHUB_REPOSITORY'];
+        const githubRunId = process.env['GITHUB_RUN_ID'];
         if (!githubRepository) {
             throw new Error('Unexpectedly missing Github context GITHUB_REPOSITORY!');
+        }
+        if (!githubRunId) {
+            throw new Error('Unexpectedly missing Github context GITHUB_RUN_ID!');
+        }
+        const ref = core.getInput('ref') || process.env['GITHUB_REF'];
+        if (!ref) {
+            throw new Error("No 'ref' input provided and GITHUB_REF not available in the environment!");
         }
         const [repoOwner, repoName] = githubRepository.split('/');
         const repo = {
             owner: repoOwner,
             name: repoName
         };
-        const ref = core.getInput('ref') || process.env['GITHUB_REF'];
-        if (!ref) {
-            throw new Error("No 'ref' input provided and GITHUB_REF not available in the environment!");
-        }
+        const logUrl = createLogUrl(githubRepository, githubRunId);
         const version = core.getInput('version');
         const deploymentId = core.getState('deploymentId');
         const requiredContexts = core.getInput('required_contexts') || '';
         const environmentName = core.getInput('environment_name');
-        const isProduction = environmentName === 'production';
+        const isProduction = toBoolean(core.getInput('is_production')) ||
+            environmentName === 'production' ||
+            !!environmentName.match(/^kube-prod\d+$/);
         const environmentUrl = core.getInput('environment_url');
         const environment = {
             name: environmentName,
@@ -5493,6 +5504,7 @@ function getContext() {
             requiredContexts: parseArray(requiredContexts),
             repo,
             ref,
+            logUrl,
             environment
         };
         if (version) {
@@ -5552,7 +5564,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.setDeploymentEnded = exports.setDeploymentInProgress = exports.createDeployment = exports.githubPreviews = void 0;
+exports.setDeploymentEnded = exports.setDeploymentInProgress = exports.setDeploymentLogUrl = exports.createDeployment = exports.githubPreviews = void 0;
 const github = __importStar(__webpack_require__(438));
 const context_1 = __webpack_require__(842);
 exports.githubPreviews = [
@@ -5573,9 +5585,29 @@ function createDeployment(context) {
             } }, options)));
         context.deploymentId = deployment.data.id;
         context_1.saveExecutionState(context);
+        yield setDeploymentLogUrl(context);
     });
 }
 exports.createDeployment = createDeployment;
+function setDeploymentLogUrl(context) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const octokit = github.getOctokit(context.token);
+        if (!context.deploymentId) {
+            throw new Error('Deployment ID not available to set deployment status. This is a bug in the action!');
+        }
+        yield octokit.repos.createDeploymentStatus({
+            owner: context.repo.owner,
+            repo: context.repo.name,
+            deployment_id: context.deploymentId,
+            state: 'pending',
+            log_url: context.logUrl,
+            mediaType: {
+                previews: exports.githubPreviews
+            }
+        });
+    });
+}
+exports.setDeploymentLogUrl = setDeploymentLogUrl;
 function setDeploymentInProgress(context) {
     return __awaiter(this, void 0, void 0, function* () {
         const octokit = github.getOctokit(context.token);
