@@ -131,7 +131,9 @@ describe('context', () => {
 
   test('no runId input', async () => {
     delete process.env['GITHUB_RUN_ID']
-    await expect(getContext()).rejects.toThrow(/Unexpectedly missing.*GITHUB_RUN_ID/)
+    await expect(getContext()).rejects.toThrow(
+      /Unexpectedly missing.*GITHUB_RUN_ID/
+    )
   })
 
   test('no ref inputs', async () => {

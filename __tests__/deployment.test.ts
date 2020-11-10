@@ -75,10 +75,7 @@ describe('pre-build stage', () => {
       .post(
         `/repos/${context.repo.owner}/${context.repo.name}/deployments/${deploymentId}/statuses`,
         body => {
-          return (
-            body.state === 'pending' &&
-              body.log_url === context.logUrl
-          )
+          return body.state === 'pending' && body.log_url === context.logUrl
         }
       )
       .reply(200)
