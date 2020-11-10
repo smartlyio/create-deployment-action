@@ -4,6 +4,7 @@ import {
   getContext,
   saveExecutionState,
   executionStage,
+  createLogUrl,
   PRE_HAS_RUN,
   MAIN_HAS_RUN,
   DEPLOYMENT_ID
@@ -61,6 +62,7 @@ describe('saveExecutionState', () => {
     version: '',
     requiredContexts: [],
     jobStatus: 'success',
+    logUrl: '',
     repo: {
       owner: '',
       name: ''
@@ -113,14 +115,23 @@ describe('context', () => {
   delete process.env[`STATE_${PRE_HAS_RUN}`]
   delete process.env[`STATE_${MAIN_HAS_RUN}`]
   delete process.env[`STATE_${DEPLOYMENT_ID}`]
-  process.env[`GITHUB_REPOSITORY`] = 'smartlyio/ci-sla'
-  process.env[`GITHUB_REF`] = 'refs/heads/master'
 
-  test('no repository inputs', async () => {
+  const repository = 'smartlyio/ci-sla'
+  const runId = '1234'
+  process.env['GITHUB_REPOSITORY'] = repository
+  process.env['GITHUB_REF'] = 'refs/heads/master'
+  process.env['GITHUB_RUN_ID'] = runId
+
+  test('no repository input', async () => {
     delete process.env[`GITHUB_REPOSITORY`]
     await expect(getContext()).rejects.toThrow(
       /Unexpectedly missing.*GITHUB_REPOSITORY/
     )
+  })
+
+  test('no runId input', async () => {
+    delete process.env['GITHUB_RUN_ID']
+    await expect(getContext()).rejects.toThrow(/Unexpectedly missing.*GITHUB_RUN_ID/)
   })
 
   test('no ref inputs', async () => {
@@ -171,7 +182,8 @@ describe('context', () => {
         requiredContexts: [],
         ref,
         version,
-        jobStatus
+        jobStatus,
+        logUrl: createLogUrl(repository, runId)
       })
     )
   })

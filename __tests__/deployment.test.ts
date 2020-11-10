@@ -42,6 +42,7 @@ describe('pre-build stage', () => {
     version: 'v1.2.3',
     requiredContexts: [],
     jobStatus: 'success',
+    logUrl: '',
     repo: {
       owner: 'smartlyio',
       name: 'ci-sla'
@@ -92,6 +93,7 @@ describe('main build stage', () => {
     version: 'v1.2.3',
     requiredContexts: [],
     jobStatus: 'success',
+    logUrl: '',
     repo: {
       owner: 'smartlyio',
       name: 'ci-sla'
@@ -130,6 +132,7 @@ describe('post build stage', () => {
     version: 'v1.2.3',
     requiredContexts: [],
     jobStatus: 'success',
+    logUrl: '',
     repo: {
       owner: 'smartlyio',
       name: 'ci-sla'
