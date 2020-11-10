@@ -1,3 +1,4 @@
+import * as core from '@actions/core'
 import * as github from '@actions/github'
 import {
   OctokitResponse,
@@ -18,6 +19,7 @@ export async function createDeployment(context: Context): Promise<void> {
       version: context.version
     }
   }
+  core.info('Creating new deployment')
   const deployment = (await octokit.repos.createDeployment({
     owner: context.repo.owner,
     repo: context.repo.name,
@@ -44,6 +46,7 @@ export async function setDeploymentLogUrl(context: Context): Promise<void> {
       'Deployment ID not available to set deployment status. This is a bug in the action!'
     )
   }
+  core.info('Setting deployment log url')
   await octokit.repos.createDeploymentStatus({
     owner: context.repo.owner,
     repo: context.repo.name,
@@ -63,6 +66,7 @@ export async function setDeploymentInProgress(context: Context): Promise<void> {
       'Deployment ID not available to set deployment status. This is a bug in the action!'
     )
   }
+  core.info('Setting deployment status to in_progress')
   await octokit.repos.createDeploymentStatus({
     owner: context.repo.owner,
     repo: context.repo.name,
@@ -81,13 +85,18 @@ export async function setDeploymentEnded(context: Context): Promise<void> {
       'Deployment ID not available to set deployment status. This is a bug in the action!'
     )
   }
-  const state: JobStatus = ['success', 'failure'].includes(context.jobStatus)
+  const validJobStatus = ['success', 'failure', 'inactive'].includes(
+    context.jobStatus
+  )
+  const state: JobStatus = validJobStatus
     ? (context.jobStatus as JobStatus)
     : ('error' as JobStatus)
   const options: Record<string, string> = {}
   if (context.environment.url) {
     options.environment_url = context.environment.url
   }
+
+  core.info(`Setting deployment status to ${state}`)
   await octokit.repos.createDeploymentStatus({
     owner: context.repo.owner,
     repo: context.repo.name,

@@ -2,7 +2,9 @@ jest.mock('@actions/core', () => ({
   getInput: jest.fn(),
   saveState: jest.fn(),
   getState: jest.fn(),
-  info: jest.fn()
+  info: jest.fn(),
+  error: jest.fn(),
+  warning: jest.fn()
 }))
 
 import nock from 'nock'

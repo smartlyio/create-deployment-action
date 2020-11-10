@@ -4,6 +4,7 @@ import {createDeployment} from './deployment'
 
 async function run(): Promise<void> {
   try {
+    core.info(`Executing action pre-run stage`)
     const context: Context = await getContext()
     if (context.executionStage !== 'pre') {
       // This could happen if there is an error creating the deployment, and state is not saved.
@@ -14,6 +15,7 @@ async function run(): Promise<void> {
     await createDeployment(context)
     saveExecutionState(context)
   } catch (error) {
+    core.error(error.message)
     core.setFailed(error.message)
   }
 }
