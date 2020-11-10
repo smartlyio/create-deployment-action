@@ -4,6 +4,13 @@ export const PRE_HAS_RUN = 'preHasRun'
 export const MAIN_HAS_RUN = 'mainHasRun'
 export const DEPLOYMENT_ID = 'deploymentId'
 
+export function createLogUrl(
+  githubRepository: string,
+  githubRunId: string
+): string {
+  return `https://github.com/${githubRepository}/actions/runs/${githubRunId}`
+}
+
 export function executionStage(): string {
   const isMain = !!process.env[`STATE_${PRE_HAS_RUN}`]
   const isPost = !!process.env[`STATE_${MAIN_HAS_RUN}`]
@@ -54,6 +61,7 @@ export interface Context {
   executionStage: string
   token: string
   jobStatus: string
+  logUrl: string
   environment: Environment
   repo: Repository
   ref: string
@@ -78,13 +86,12 @@ export async function getContext(): Promise<Context> {
   const stage = executionStage()
 
   const githubRepository: string | undefined = process.env['GITHUB_REPOSITORY']
+  const githubRunId: string | undefined = process.env['GITHUB_RUN_ID']
   if (!githubRepository) {
     throw new Error('Unexpectedly missing Github context GITHUB_REPOSITORY!')
   }
-  const [repoOwner, repoName] = githubRepository.split('/')
-  const repo: Repository = {
-    owner: repoOwner,
-    name: repoName
+  if (!githubRunId) {
+    throw new Error('Unexpectedly missing Github context GITHUB_RUN_ID!')
   }
 
   const ref: string | undefined =
@@ -95,12 +102,23 @@ export async function getContext(): Promise<Context> {
     )
   }
 
+  const [repoOwner, repoName] = githubRepository.split('/')
+  const repo: Repository = {
+    owner: repoOwner,
+    name: repoName
+  }
+
+  const logUrl = createLogUrl(githubRepository, githubRunId)
+
   const version: string = core.getInput('version')
   const deploymentId = core.getState('deploymentId')
   const requiredContexts = core.getInput('required_contexts') || ''
 
   const environmentName: string = core.getInput('environment_name')
-  const isProduction: boolean = environmentName === 'production'
+  const isProduction: boolean =
+    toBoolean(core.getInput('is_production')) ||
+    environmentName === 'production' ||
+    !!environmentName.match(/^kube-prod\d+$/)
   const environmentUrl: string = core.getInput('environment_url')
   const environment: Environment = {
     name: environmentName,
@@ -118,6 +136,7 @@ export async function getContext(): Promise<Context> {
     requiredContexts: parseArray(requiredContexts),
     repo,
     ref,
+    logUrl,
     environment
   }
   if (version) {

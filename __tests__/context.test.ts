@@ -4,6 +4,7 @@ import {
   getContext,
   saveExecutionState,
   executionStage,
+  createLogUrl,
   PRE_HAS_RUN,
   MAIN_HAS_RUN,
   DEPLOYMENT_ID
@@ -61,6 +62,7 @@ describe('saveExecutionState', () => {
     version: '',
     requiredContexts: [],
     jobStatus: 'success',
+    logUrl: '',
     repo: {
       owner: '',
       name: ''
@@ -113,13 +115,24 @@ describe('context', () => {
   delete process.env[`STATE_${PRE_HAS_RUN}`]
   delete process.env[`STATE_${MAIN_HAS_RUN}`]
   delete process.env[`STATE_${DEPLOYMENT_ID}`]
-  process.env[`GITHUB_REPOSITORY`] = 'smartlyio/ci-sla'
-  process.env[`GITHUB_REF`] = 'refs/heads/master'
 
-  test('no repository inputs', async () => {
+  const repository = 'smartlyio/ci-sla'
+  const runId = '1234'
+  process.env['GITHUB_REPOSITORY'] = repository
+  process.env['GITHUB_REF'] = 'refs/heads/master'
+  process.env['GITHUB_RUN_ID'] = runId
+
+  test('no repository input', async () => {
     delete process.env[`GITHUB_REPOSITORY`]
     await expect(getContext()).rejects.toThrow(
       /Unexpectedly missing.*GITHUB_REPOSITORY/
+    )
+  })
+
+  test('no runId input', async () => {
+    delete process.env['GITHUB_RUN_ID']
+    await expect(getContext()).rejects.toThrow(
+      /Unexpectedly missing.*GITHUB_RUN_ID/
     )
   })
 
@@ -171,7 +184,82 @@ describe('context', () => {
         requiredContexts: [],
         ref,
         version,
-        jobStatus
+        jobStatus,
+        logUrl: createLogUrl(repository, runId)
+      })
+    )
+  })
+
+  test('kube-prodN is production', async () => {
+    const mockGetInput = mocked(getInput)
+    const environment = 'kube-prod5'
+    mockGetInput.mockImplementation((name: string): string => {
+      switch (name) {
+        case 'environment_name':
+          return environment
+        default:
+          return ''
+      }
+    })
+
+    const context = await getContext()
+    expect(context).toEqual(
+      expect.objectContaining({
+        environment: expect.objectContaining({
+          name: environment,
+          isProduction: true,
+          isTransient: false
+        })
+      })
+    )
+  })
+
+  test('is_production input overrides default', async () => {
+    const mockGetInput = mocked(getInput)
+    const environment = 'dev'
+    mockGetInput.mockImplementation((name: string): string => {
+      switch (name) {
+        case 'environment_name':
+          return environment
+        case 'is_production':
+          return 'true'
+        default:
+          return ''
+      }
+    })
+
+    const context = await getContext()
+    expect(context).toEqual(
+      expect.objectContaining({
+        environment: expect.objectContaining({
+          name: environment,
+          isProduction: true,
+          isTransient: false
+        })
+      })
+    )
+  })
+
+  test('default is_production when not prod', async () => {
+    const mockGetInput = mocked(getInput)
+    const environment = 'dev'
+    mockGetInput.mockImplementation((name: string): string => {
+      switch (name) {
+        case 'environment_name':
+          return environment
+        default:
+          return ''
+      }
+    })
+
+    const context = await getContext()
+    expect(context).toEqual(
+      expect.objectContaining({
+        environment: expect.objectContaining({
+          name: environment,
+          isProduction: false,
+          isTransient: true
+        })
       })
     )
   })
