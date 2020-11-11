@@ -41,19 +41,3 @@ jobs:
         token: ${{ github.token }}
         environment_name: ${{ github.job }}
         skip_pre_action: true
-
-  test-push:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-    - uses: actions/checkout@v2
-    - name: Create Deployment
-      uses: ./
-      env:
-        GITHUB_EVENT_NAME: push
-        GITHUB_REF: refs/heads/master
-        GITHUB_SHA: abc123
-      with:
-        token: ${{ github.token }}
-        environment_name: ${{ github.job }}
-        skip_pre_action: true
