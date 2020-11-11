@@ -59,6 +59,7 @@ export declare type JobStatus =
   | 'success'
 
 export interface Context {
+  skipPreAction: boolean
   executionStage: string
   token: string
   jobStatus: string
@@ -183,6 +184,7 @@ export async function getContext(): Promise<Context> {
   }
 
   const context: Context = {
+    skipPreAction: toBoolean(core.getInput('skip_pre_action')),
     executionStage: stage,
     token: core.getInput('token', {required: true}),
     jobStatus: core.getInput('job_status', {required: true}),
