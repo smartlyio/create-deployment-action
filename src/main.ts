@@ -19,7 +19,9 @@ export async function runPre(): Promise<void> {
     }
 
     if (context.skipPreAction) {
-      core.info(`Skipping action pre-run stage; deployment will be created in the main stage`)
+      core.info(
+        `Skipping action pre-run stage; deployment will be created in the main stage`
+      )
     } else {
       await createDeployment(context)
     }
