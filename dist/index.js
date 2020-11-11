@@ -5447,8 +5447,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getContext = exports.parseArray = exports.toBoolean = exports.saveExecutionState = exports.executionStage = exports.createLogUrl = exports.DEPLOYMENT_ID = exports.MAIN_HAS_RUN = exports.PRE_HAS_RUN = void 0;
+exports.getContext = exports.getVersion = exports.getRef = exports.parseArray = exports.toBoolean = exports.saveExecutionState = exports.executionStage = exports.createLogUrl = exports.DEPLOYMENT_ID = exports.MAIN_HAS_RUN = exports.PRE_HAS_RUN = void 0;
 const core = __importStar(__webpack_require__(186));
+const fs_1 = __webpack_require__(747);
 exports.PRE_HAS_RUN = 'preHasRun';
 exports.MAIN_HAS_RUN = 'mainHasRun';
 exports.DEPLOYMENT_ID = 'deploymentId';
@@ -5495,6 +5496,57 @@ function parseArray(value) {
     return value.trim().split(/\s+/);
 }
 exports.parseArray = parseArray;
+function getRef() {
+    const inputRef = core.getInput('ref');
+    if (inputRef) {
+        core.debug(`Got ref ${inputRef} from inputs`);
+        return inputRef;
+    }
+    if (process.env['GITHUB_EVENT'] === 'pull_request') {
+        const headRef = process.env['GITHUB_HEAD_REF'];
+        if (headRef) {
+            core.debug(`Got ref ${headRef} from GITHUB_HEAD_REF`);
+            return headRef;
+        }
+    }
+    const ref = process.env['GITHUB_REF'];
+    if (!ref) {
+        throw new Error("No 'ref' input provided and neither GITHUB_HEAD_REF nor GITHUB_REF available in the environment!");
+    }
+    return ref;
+}
+exports.getRef = getRef;
+function getVersion() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const inputVersion = core.getInput('version');
+        if (inputVersion) {
+            return inputVersion;
+        }
+        if (process.env['GITHUB_EVENT'] === 'pull_request') {
+            const eventPath = process.env['GITHUB_EVENT_PATH'];
+            if (!eventPath) {
+                throw new Error('Could not find event payload file to determine inputs. Provide "version" as a direct input to the action');
+            }
+            const eventData = yield fs_1.promises.readFile(eventPath);
+            const event = JSON.parse(eventData.toString());
+            if (event &&
+                event.pull_request &&
+                event.pull_request.head &&
+                event.pull_request.head.sha) {
+                return event.pull_request.head.sha;
+            }
+            else {
+                throw new Error('Event payload does not provide the HEAD SHA. Provide "version" as a direct input to the action');
+            }
+        }
+        const sha = process.env['GITHUB_SHA'];
+        if (!sha) {
+            throw new Error("No 'version' input provided and GITHUB_SHA not available in the environment!");
+        }
+        return sha;
+    });
+}
+exports.getVersion = getVersion;
 function getContext() {
     return __awaiter(this, void 0, void 0, function* () {
         const stage = executionStage();
@@ -5506,17 +5558,14 @@ function getContext() {
         if (!githubRunId) {
             throw new Error('Unexpectedly missing Github context GITHUB_RUN_ID!');
         }
-        const ref = core.getInput('ref') || process.env['GITHUB_REF'];
-        if (!ref) {
-            throw new Error("No 'ref' input provided and GITHUB_REF not available in the environment!");
-        }
+        const ref = getRef();
         const [repoOwner, repoName] = githubRepository.split('/');
         const repo = {
             owner: repoOwner,
             name: repoName
         };
         const logUrl = createLogUrl(githubRepository, githubRunId);
-        const version = core.getInput('version');
+        const version = yield getVersion();
         const deploymentId = core.getState('deploymentId');
         const requiredContexts = core.getInput('required_contexts') || '';
         const environmentName = core.getInput('environment_name');
