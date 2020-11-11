@@ -34,14 +34,21 @@ export async function runMain(): Promise<void> {
   try {
     core.info(`Executing action main stage`)
     const context: Context = await getContext()
+
+    if (context.skipPreAction) {
+      if (['pre', 'main'].includes(context.executionStage)) {
+        throw new Error(
+          `Unexpected execution stage "${context.executionStage}" when executing main stage`
+        )
+      }
+      context.executionStage = 'main'
+      await createDeployment(context)
+    }
+
     if (context.executionStage !== 'main') {
       throw new Error(
         `Unexpected execution stage "${context.executionStage}" when executing main stage`
       )
-    }
-
-    if (context.skipPreAction) {
-      await createDeployment(context)
     }
 
     await setDeploymentInProgress(context)
