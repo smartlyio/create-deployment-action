@@ -212,7 +212,6 @@ describe('getVersion', () => {
   })
 })
 
-
 describe('context', () => {
   delete process.env[`STATE_${PRE_HAS_RUN}`]
   delete process.env[`STATE_${MAIN_HAS_RUN}`]

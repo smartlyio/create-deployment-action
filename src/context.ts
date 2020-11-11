@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import { promises as fs } from "fs"
+import {promises as fs} from 'fs'
 
 export const PRE_HAS_RUN = 'preHasRun'
 export const MAIN_HAS_RUN = 'mainHasRun'
