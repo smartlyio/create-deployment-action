@@ -5724,6 +5724,7 @@ function setDeploymentInProgress(context) {
             repo: context.repo.name,
             deployment_id: context.deploymentId,
             state: 'in_progress',
+            log_url: context.logUrl,
             mediaType: {
                 previews: exports.githubPreviews
             }
@@ -5746,7 +5747,7 @@ function setDeploymentEnded(context) {
             options.environment_url = context.environment.url;
         }
         core.info(`Setting deployment status to ${state}`);
-        yield octokit.repos.createDeploymentStatus(Object.assign({ owner: context.repo.owner, repo: context.repo.name, deployment_id: context.deploymentId, state, mediaType: {
+        yield octokit.repos.createDeploymentStatus(Object.assign({ owner: context.repo.owner, repo: context.repo.name, deployment_id: context.deploymentId, state, log_url: context.logUrl, mediaType: {
                 previews: exports.githubPreviews
             } }, options));
     });
