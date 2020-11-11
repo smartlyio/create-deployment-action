@@ -1,0 +1,7 @@
+{
+  "pull_request": {
+    "head": {
+      "sha": "pull_request_sha"
+    }
+  }
+}
