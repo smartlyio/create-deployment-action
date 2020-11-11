@@ -90,7 +90,7 @@ export function getRef(): string {
     core.debug(`Got ref ${inputRef} from inputs`)
     return inputRef
   }
-  if (process.env['GITHUB_EVENT'] === 'pull_request') {
+  if (process.env['GITHUB_EVENT_NAME'] === 'pull_request') {
     const headRef: string | undefined = process.env['GITHUB_HEAD_REF']
     if (headRef) {
       core.debug(`Got ref ${headRef} from GITHUB_HEAD_REF`)
@@ -111,7 +111,7 @@ export async function getVersion(): Promise<string> {
   if (inputVersion) {
     return inputVersion
   }
-  if (process.env['GITHUB_EVENT'] === 'pull_request') {
+  if (process.env['GITHUB_EVENT_NAME'] === 'pull_request') {
     const eventPath = process.env['GITHUB_EVENT_PATH']
     if (!eventPath) {
       throw new Error(

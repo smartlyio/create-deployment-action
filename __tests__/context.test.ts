@@ -131,7 +131,7 @@ describe('getRef', () => {
     mocked(getInput).mockImplementationOnce(() => {
       return expectedRef
     })
-    process.env['GITHUB_EVENT'] = 'pull_request'
+    process.env['GITHUB_EVENT_NAME'] = 'pull_request'
     process.env['GITHUB_HEAD_REF'] = 'headRef'
     process.env['GITHUB_REF'] = 'ref'
     expect(getRef()).toEqual(expectedRef)
@@ -142,7 +142,7 @@ describe('getRef', () => {
     mocked(getInput).mockImplementationOnce(() => {
       return ''
     })
-    process.env['GITHUB_EVENT'] = 'pull_request'
+    process.env['GITHUB_EVENT_NAME'] = 'pull_request'
     process.env['GITHUB_HEAD_REF'] = expectedRef
     process.env['GITHUB_REF'] = 'ref'
     expect(getRef()).toEqual(expectedRef)
@@ -153,7 +153,7 @@ describe('getRef', () => {
     mocked(getInput).mockImplementationOnce(() => {
       return ''
     })
-    process.env['GITHUB_EVENT'] = 'push'
+    process.env['GITHUB_EVENT_NAME'] = 'push'
     delete process.env['GITHUB_HEAD_REF']
     process.env['GITHUB_REF'] = expectedRef
     expect(getRef()).toEqual(expectedRef)
@@ -164,7 +164,7 @@ describe('getRef', () => {
     mocked(getInput).mockImplementationOnce(() => {
       return ''
     })
-    process.env['GITHUB_EVENT'] = 'push'
+    process.env['GITHUB_EVENT_NAME'] = 'push'
     process.env['GITHUB_HEAD_REF'] = 'head'
     process.env['GITHUB_REF'] = expectedRef
     expect(getRef()).toEqual(expectedRef)
@@ -174,7 +174,7 @@ describe('getRef', () => {
 describe('getVersion', () => {
   test('throws an error with no input and no environment', async () => {
     delete process.env['GITHUB_SHA']
-    delete process.env['GITHUB_EVENT']
+    delete process.env['GITHUB_EVENT_NAME']
     await expect(getVersion()).rejects.toThrow(/^No 'version'.*/)
   })
 
@@ -184,7 +184,7 @@ describe('getVersion', () => {
       return expectedVersion
     })
     delete process.env['GITHUB_SHA']
-    delete process.env['GITHUB_EVENT']
+    delete process.env['GITHUB_EVENT_NAME']
     expect(await getVersion()).toEqual(expectedVersion)
   })
 
@@ -197,7 +197,7 @@ describe('getVersion', () => {
       return ''
     })
     delete process.env['GITHUB_SHA']
-    process.env['GITHUB_EVENT'] = 'pull_request'
+    process.env['GITHUB_EVENT_NAME'] = 'pull_request'
     process.env['GITHUB_EVENT_PATH'] = eventPath
     expect(await getVersion()).toEqual(expectedVersion)
   })
@@ -208,7 +208,7 @@ describe('getVersion', () => {
       return ''
     })
     process.env['GITHUB_SHA'] = expectedVersion
-    process.env['GITHUB_EVENT'] = 'push'
+    process.env['GITHUB_EVENT_NAME'] = 'push'
     expect(await getVersion()).toEqual(expectedVersion)
   })
 })
