@@ -240,6 +240,9 @@ describe('context', () => {
 
   test('no ref inputs', async () => {
     delete process.env[`GITHUB_REF`]
+    delete process.env[`GITHUB_SHA`]
+    delete process.env[`GITHUB_HEAD_REF`]
+    delete process.env[`GITHUB_EVENT_NAME`]
     await expect(getContext()).rejects.toThrow(/No 'ref' input provided/)
   })
 
