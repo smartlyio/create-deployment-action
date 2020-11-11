@@ -1457,7 +1457,7 @@ function runMain() {
             core.info(`Executing action main stage`);
             const context = yield context_1.getContext();
             if (context.skipPreAction) {
-                if (['pre', 'main'].includes(context.executionStage)) {
+                if (!['pre', 'main'].includes(context.executionStage)) {
                     throw new Error(`Unexpected execution stage "${context.executionStage}" when executing main stage`);
                 }
                 context.executionStage = 'main';

@@ -38,7 +38,7 @@ export async function runMain(): Promise<void> {
     const context: Context = await getContext()
 
     if (context.skipPreAction) {
-      if (['pre', 'main'].includes(context.executionStage)) {
+      if (!['pre', 'main'].includes(context.executionStage)) {
         throw new Error(
           `Unexpected execution stage "${context.executionStage}" when executing main stage`
         )
