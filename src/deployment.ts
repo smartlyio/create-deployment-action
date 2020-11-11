@@ -77,6 +77,7 @@ export async function setDeploymentInProgress(context: Context): Promise<void> {
     repo: context.repo.name,
     deployment_id: context.deploymentId,
     state: 'in_progress',
+    log_url: context.logUrl,
     mediaType: {
       previews: githubPreviews
     }
@@ -107,6 +108,7 @@ export async function setDeploymentEnded(context: Context): Promise<void> {
     repo: context.repo.name,
     deployment_id: context.deploymentId,
     state,
+    log_url: context.logUrl,
     mediaType: {
       previews: githubPreviews
     },
