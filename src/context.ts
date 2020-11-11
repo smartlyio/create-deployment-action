@@ -172,7 +172,7 @@ export async function getContext(): Promise<Context> {
   const isProduction: boolean =
     toBoolean(core.getInput('is_production')) ||
     environmentName === 'production' ||
-    !!environmentName.match(/^kube-prod\d+$/)
+    !!environmentName.match(/^kube-(prod|intra)\d+$/)
   const environmentUrl: string = core.getInput('environment_url')
   const environment: Environment = {
     name: environmentName,
