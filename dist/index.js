@@ -1436,7 +1436,12 @@ function runPre() {
                 // This could happen if there is an error creating the deployment, and state is not saved.
                 throw new Error(`Unexpected execution stage "${context.executionStage}" when executing pre stage.`);
             }
-            yield deployment_1.createDeployment(context);
+            if (context.skipPreAction) {
+                core.info(`Skipping action pre-run stage; deployment will be created in the main stage`);
+            }
+            else {
+                yield deployment_1.createDeployment(context);
+            }
             context_1.saveExecutionState(context);
         }
         catch (error) {
@@ -1451,6 +1456,13 @@ function runMain() {
         try {
             core.info(`Executing action main stage`);
             const context = yield context_1.getContext();
+            if (context.skipPreAction) {
+                if (['pre', 'main'].includes(context.executionStage)) {
+                    throw new Error(`Unexpected execution stage "${context.executionStage}" when executing main stage`);
+                }
+                context.executionStage = 'main';
+                yield deployment_1.createDeployment(context);
+            }
             if (context.executionStage !== 'main') {
                 throw new Error(`Unexpected execution stage "${context.executionStage}" when executing main stage`);
             }
@@ -5582,6 +5594,7 @@ function getContext() {
             environment.url = environmentUrl;
         }
         const context = {
+            skipPreAction: toBoolean(core.getInput('skip_pre_action')),
             executionStage: stage,
             token: core.getInput('token', { required: true }),
             jobStatus: core.getInput('job_status', { required: true }),
@@ -5664,8 +5677,13 @@ function createDeployment(context) {
                 version: context.version
             };
         }
-        core.info('Creating new deployment');
-        const deployment = (yield octokit.repos.createDeployment(Object.assign({ owner: context.repo.owner, repo: context.repo.name, ref: context.ref, environment: context.environment.name, transient_environment: context.environment.isTransient, production_environment: context.environment.isProduction, required_contexts: context.requiredContexts, auto_merge: false, mediaType: {
+        const owner = context.repo.owner;
+        const repo = context.repo.name;
+        const ref = context.ref;
+        core.info(`Creating new deployment for ${owner}/${repo} with ref ${ref} and version ${context.version}`);
+        const deployment = (yield octokit.repos.createDeployment(Object.assign({ owner,
+            repo,
+            ref, environment: context.environment.name, transient_environment: context.environment.isTransient, production_environment: context.environment.isProduction, required_contexts: context.requiredContexts, auto_merge: false, mediaType: {
                 previews: exports.githubPreviews
             } }, options)));
         context.deploymentId = deployment.data.id;
@@ -5680,7 +5698,7 @@ function setDeploymentLogUrl(context) {
         if (!context.deploymentId) {
             throw new Error('Deployment ID not available to set deployment status. This is a bug in the action!');
         }
-        core.info('Setting deployment log url');
+        core.info(`Setting deployment log url to ${context.logUrl}`);
         yield octokit.repos.createDeploymentStatus({
             owner: context.repo.owner,
             repo: context.repo.name,
