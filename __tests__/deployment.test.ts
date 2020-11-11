@@ -3,6 +3,7 @@ jest.mock('@actions/core', () => ({
   saveState: jest.fn(),
   getState: jest.fn(),
   info: jest.fn(),
+  debug: jest.fn(),
   error: jest.fn(),
   warning: jest.fn()
 }))

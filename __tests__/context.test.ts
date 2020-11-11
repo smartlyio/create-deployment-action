@@ -2,6 +2,8 @@ import {
   Context,
   Environment,
   getContext,
+  getVersion,
+  getRef,
   saveExecutionState,
   executionStage,
   createLogUrl,
@@ -11,12 +13,15 @@ import {
 } from '../src/context'
 import {mocked} from 'ts-jest/utils'
 import {getInput, saveState, getState, info} from '@actions/core'
+import * as path from 'path'
+import {promises as fs} from 'fs'
 
 jest.mock('@actions/core', () => ({
   getInput: jest.fn(),
   saveState: jest.fn(),
   getState: jest.fn(),
   info: jest.fn(),
+  debug: jest.fn(),
   error: jest.fn(),
   warning: jest.fn()
 }))
@@ -113,6 +118,100 @@ describe('saveExecutionState', () => {
   })
 })
 
+describe('getRef', () => {
+  test('throws an error with no input and no environment', () => {
+    delete process.env['GITHUB_REF']
+    delete process.env['GITHUB_HEAD_REF']
+    expect(getRef).toThrow(/^No 'ref'.*/)
+  })
+
+  test('Gets a ref from input as top priority', () => {
+    const expectedRef = 'inputRef'
+    mocked(getInput).mockImplementationOnce(() => {
+      return expectedRef
+    })
+    process.env['GITHUB_EVENT'] = 'pull_request'
+    process.env['GITHUB_HEAD_REF'] = 'headRef'
+    process.env['GITHUB_REF'] = 'ref'
+    expect(getRef()).toEqual(expectedRef)
+  })
+
+  test('Gets a ref from HEAD_REF as second priority if PR', () => {
+    const expectedRef = 'headRef'
+    mocked(getInput).mockImplementationOnce(() => {
+      return ''
+    })
+    process.env['GITHUB_EVENT'] = 'pull_request'
+    process.env['GITHUB_HEAD_REF'] = expectedRef
+    process.env['GITHUB_REF'] = 'ref'
+    expect(getRef()).toEqual(expectedRef)
+  })
+
+  test('Gets a ref from REF as third priority if PR', () => {
+    const expectedRef = 'ref'
+    mocked(getInput).mockImplementationOnce(() => {
+      return ''
+    })
+    process.env['GITHUB_EVENT'] = 'push'
+    delete process.env['GITHUB_HEAD_REF']
+    process.env['GITHUB_REF'] = expectedRef
+    expect(getRef()).toEqual(expectedRef)
+  })
+
+  test('Gets a ref from REF as second priority if not PR', () => {
+    const expectedRef = 'ref'
+    mocked(getInput).mockImplementationOnce(() => {
+      return ''
+    })
+    process.env['GITHUB_EVENT'] = 'push'
+    process.env['GITHUB_HEAD_REF'] = 'head'
+    process.env['GITHUB_REF'] = expectedRef
+    expect(getRef()).toEqual(expectedRef)
+  })
+})
+
+describe('getVersion', () => {
+  test('throws an error with no input and no environment', async () => {
+    delete process.env['GITHUB_SHA']
+    delete process.env['GITHUB_EVENT']
+    await expect(getVersion()).rejects.toThrow(/^No 'version'.*/)
+  })
+
+  test('Returns input version as first priority', async () => {
+    const expectedVersion = 'version'
+    mocked(getInput).mockImplementationOnce(() => {
+      return expectedVersion
+    })
+    delete process.env['GITHUB_SHA']
+    delete process.env['GITHUB_EVENT']
+    expect(await getVersion()).toEqual(expectedVersion)
+  })
+
+  test('Returns PR head sha from event file as second priority in PR', async () => {
+    const eventPath = path.join(__dirname, 'pr_event.json')
+    const eventData = await fs.readFile(eventPath)
+    const event = JSON.parse(eventData.toString())
+    const expectedVersion = event.pull_request.head.sha
+    mocked(getInput).mockImplementationOnce(() => {
+      return ''
+    })
+    delete process.env['GITHUB_SHA']
+    process.env['GITHUB_EVENT'] = 'pull_request'
+    process.env['GITHUB_EVENT_PATH'] = eventPath
+    expect(await getVersion()).toEqual(expectedVersion)
+  })
+
+  test('Returns sha as second priority not in PR', async () => {
+    const expectedVersion = 'headSha'
+    mocked(getInput).mockImplementationOnce(() => {
+      return ''
+    })
+    process.env['GITHUB_SHA'] = expectedVersion
+    process.env['GITHUB_EVENT'] = 'push'
+    expect(await getVersion()).toEqual(expectedVersion)
+  })
+})
+
 describe('context', () => {
   delete process.env[`STATE_${PRE_HAS_RUN}`]
   delete process.env[`STATE_${MAIN_HAS_RUN}`]
@@ -199,6 +298,8 @@ describe('context', () => {
       switch (name) {
         case 'environment_name':
           return environment
+        case 'version':
+          return '1.2.3'
         default:
           return ''
       }
@@ -225,6 +326,8 @@ describe('context', () => {
           return environment
         case 'is_production':
           return 'true'
+        case 'version':
+          return '1.2.3'
         default:
           return ''
       }
@@ -249,6 +352,8 @@ describe('context', () => {
       switch (name) {
         case 'environment_name':
           return environment
+        case 'version':
+          return '1.2.3'
         default:
           return ''
       }

@@ -17,7 +17,6 @@ inputs:
   version:
     description: 'The version being deployed (for disply purposes only)'
     required: false
-    default: ${{ github.sha }}
 
   required_contexts:
     description: >-
