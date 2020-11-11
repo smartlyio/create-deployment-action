@@ -10,13 +10,21 @@ export async function runPre(): Promise<void> {
   try {
     core.info(`Executing action pre-run stage`)
     const context: Context = await getContext()
+
     if (context.executionStage !== 'pre') {
       // This could happen if there is an error creating the deployment, and state is not saved.
       throw new Error(
         `Unexpected execution stage "${context.executionStage}" when executing pre stage.`
       )
     }
-    await createDeployment(context)
+
+    if (context.skipPreAction) {
+      core.info(
+        `Skipping action pre-run stage; deployment will be created in the main stage`
+      )
+    } else {
+      await createDeployment(context)
+    }
     saveExecutionState(context)
   } catch (error) {
     core.error(error.message)
@@ -28,11 +36,23 @@ export async function runMain(): Promise<void> {
   try {
     core.info(`Executing action main stage`)
     const context: Context = await getContext()
+
+    if (context.skipPreAction) {
+      if (!['pre', 'main'].includes(context.executionStage)) {
+        throw new Error(
+          `Unexpected execution stage "${context.executionStage}" when executing main stage`
+        )
+      }
+      context.executionStage = 'main'
+      await createDeployment(context)
+    }
+
     if (context.executionStage !== 'main') {
       throw new Error(
         `Unexpected execution stage "${context.executionStage}" when executing main stage`
       )
     }
+
     await setDeploymentInProgress(context)
     saveExecutionState(context)
   } catch (error) {

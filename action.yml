@@ -38,6 +38,16 @@ inputs:
         - production = true
         - /^kube-prod\d+$/ = true
     required: false
+
+  skip_pre_action:
+    description: >-
+      Skip the action pre-execution step and only create the
+      deployment when the main action runs.
+
+      This allows more dynamic setup of the action parameters if they
+      need to be determined by another step in the workflow.
+    default: false
+    required: false
 runs:
   using: 'node12'
   pre: 'dist/pre.js'

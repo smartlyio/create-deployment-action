@@ -19,11 +19,16 @@ export async function createDeployment(context: Context): Promise<void> {
       version: context.version
     }
   }
-  core.info('Creating new deployment')
+  const owner = context.repo.owner
+  const repo = context.repo.name
+  const ref = context.ref
+  core.info(
+    `Creating new deployment for ${owner}/${repo} with ref ${ref} and version ${context.version}`
+  )
   const deployment = (await octokit.repos.createDeployment({
-    owner: context.repo.owner,
-    repo: context.repo.name,
-    ref: context.ref,
+    owner,
+    repo,
+    ref,
     environment: context.environment.name,
     transient_environment: context.environment.isTransient,
     production_environment: context.environment.isProduction,
@@ -46,7 +51,7 @@ export async function setDeploymentLogUrl(context: Context): Promise<void> {
       'Deployment ID not available to set deployment status. This is a bug in the action!'
     )
   }
-  core.info('Setting deployment log url')
+  core.info(`Setting deployment log url to ${context.logUrl}`)
   await octokit.repos.createDeploymentStatus({
     owner: context.repo.owner,
     repo: context.repo.name,

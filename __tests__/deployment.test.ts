@@ -39,6 +39,7 @@ nock.disableNetConnect()
 
 describe('pre-build stage', () => {
   const context: Context = {
+    skipPreAction: false,
     executionStage: 'pre',
     token: 'abc123',
     ref: 'master',
@@ -98,6 +99,7 @@ describe('pre-build stage', () => {
 
 describe('main build stage', () => {
   const context: Context = {
+    skipPreAction: false,
     executionStage: 'main',
     deploymentId: 78,
     token: 'abc123',
@@ -137,6 +139,7 @@ describe('main build stage', () => {
 
 describe('post build stage', () => {
   const context: Context = {
+    skipPreAction: false,
     executionStage: 'main',
     deploymentId: 78,
     token: 'abc123',

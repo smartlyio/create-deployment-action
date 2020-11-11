@@ -29,3 +29,15 @@ jobs:
               echo "Run `npm run-script package` and commit the changes."
               exit 1
           fi
+
+  test-basic:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - uses: actions/checkout@v2
+    - name: Create Deployment
+      uses: ./
+      with:
+        token: ${{ github.token }}
+        environment_name: ${{ github.job }}
+        skip_pre_action: true
