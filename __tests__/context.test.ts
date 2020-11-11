@@ -17,6 +17,7 @@ jest.mock('@actions/core', () => ({
   saveState: jest.fn(),
   getState: jest.fn(),
   info: jest.fn(),
+  debug: jest.fn(),
   error: jest.fn(),
   warning: jest.fn()
 }))
@@ -199,6 +200,8 @@ describe('context', () => {
       switch (name) {
         case 'environment_name':
           return environment
+        case 'version':
+          return '1.2.3'
         default:
           return ''
       }
@@ -225,6 +228,8 @@ describe('context', () => {
           return environment
         case 'is_production':
           return 'true'
+        case 'version':
+          return '1.2.3'
         default:
           return ''
       }
@@ -249,6 +254,8 @@ describe('context', () => {
       switch (name) {
         case 'environment_name':
           return environment
+        case 'version':
+          return '1.2.3'
         default:
           return ''
       }

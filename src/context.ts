@@ -1,4 +1,5 @@
 import * as core from '@actions/core'
+import { promises as fs } from "fs"
 
 export const PRE_HAS_RUN = 'preHasRun'
 export const MAIN_HAS_RUN = 'mainHasRun'
@@ -82,6 +83,64 @@ export function parseArray(value: string): string[] {
   return value.trim().split(/\s+/)
 }
 
+export function getRef(): string {
+  const inputRef: string | undefined = core.getInput('ref')
+  if (inputRef) {
+    core.debug(`Got ref ${inputRef} from inputs`)
+    return inputRef
+  }
+  if (process.env['GITHUB_EVENT'] === 'pull_request') {
+    const headRef: string | undefined = process.env['GITHUB_HEAD_REF']
+    if (headRef) {
+      core.debug(`Got ref ${headRef} from GITHUB_HEAD_REF`)
+      return headRef
+    }
+  }
+  const ref: string | undefined = process.env['GITHUB_REF']
+  if (!ref) {
+    throw new Error(
+      "No 'ref' input provided and neither GITHUB_HEAD_REF nor GITHUB_REF available in the environment!"
+    )
+  }
+  return ref
+}
+
+export async function getVersion(): Promise<string> {
+  const inputVersion = core.getInput('version')
+  if (inputVersion) {
+    return inputVersion
+  }
+  if (process.env['GITHUB_EVENT'] === 'pull_request') {
+    const eventPath = process.env['GITHUB_EVENT_PATH']
+    if (!eventPath) {
+      throw new Error(
+        'Could not find event payload file to determine inputs. Provide "version" as a direct input to the action'
+      )
+    }
+    const eventData: Buffer = await fs.readFile(eventPath)
+    const event = JSON.parse(eventData.toString())
+    if (
+      event &&
+      event.pull_request &&
+      event.pull_request.head &&
+      event.pull_request.head.sha
+    ) {
+      return event.pull_request.head.sha as string
+    } else {
+      throw new Error(
+        'Event payload does not provide the HEAD SHA. Provide "version" as a direct input to the action'
+      )
+    }
+  }
+  const sha: string | undefined = process.env['GITHUB_SHA']
+  if (!sha) {
+    throw new Error(
+      "No 'version' input provided and GITHUB_SHA not available in the environment!"
+    )
+  }
+  return sha
+}
+
 export async function getContext(): Promise<Context> {
   const stage = executionStage()
 
@@ -94,13 +153,7 @@ export async function getContext(): Promise<Context> {
     throw new Error('Unexpectedly missing Github context GITHUB_RUN_ID!')
   }
 
-  const ref: string | undefined =
-    core.getInput('ref') || process.env['GITHUB_REF']
-  if (!ref) {
-    throw new Error(
-      "No 'ref' input provided and GITHUB_REF not available in the environment!"
-    )
-  }
+  const ref = getRef()
 
   const [repoOwner, repoName] = githubRepository.split('/')
   const repo: Repository = {
@@ -110,7 +163,7 @@ export async function getContext(): Promise<Context> {
 
   const logUrl = createLogUrl(githubRepository, githubRunId)
 
-  const version: string = core.getInput('version')
+  const version: string = await getVersion()
   const deploymentId = core.getState('deploymentId')
   const requiredContexts = core.getInput('required_contexts') || ''
 
