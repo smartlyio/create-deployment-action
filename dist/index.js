@@ -5583,7 +5583,7 @@ function getContext() {
         const environmentName = core.getInput('environment_name');
         const isProduction = toBoolean(core.getInput('is_production')) ||
             environmentName === 'production' ||
-            !!environmentName.match(/^kube-prod\d+$/);
+            !!environmentName.match(/^kube-(prod|intra)\d+$/);
         const environmentUrl = core.getInput('environment_url');
         const environment = {
             name: environmentName,
