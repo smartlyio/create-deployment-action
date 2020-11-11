@@ -63,6 +63,7 @@ describe('executionStage', () => {
 
 describe('saveExecutionState', () => {
   const context: Context = {
+    skipPreAction: false,
     executionStage: 'pre',
     token: '',
     ref: '',
