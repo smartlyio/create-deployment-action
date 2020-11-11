@@ -5514,7 +5514,7 @@ function getRef() {
         core.debug(`Got ref ${inputRef} from inputs`);
         return inputRef;
     }
-    if (process.env['GITHUB_EVENT'] === 'pull_request') {
+    if (process.env['GITHUB_EVENT_NAME'] === 'pull_request') {
         const headRef = process.env['GITHUB_HEAD_REF'];
         if (headRef) {
             core.debug(`Got ref ${headRef} from GITHUB_HEAD_REF`);
@@ -5534,7 +5534,7 @@ function getVersion() {
         if (inputVersion) {
             return inputVersion;
         }
-        if (process.env['GITHUB_EVENT'] === 'pull_request') {
+        if (process.env['GITHUB_EVENT_NAME'] === 'pull_request') {
             const eventPath = process.env['GITHUB_EVENT_PATH'];
             if (!eventPath) {
                 throw new Error('Could not find event payload file to determine inputs. Provide "version" as a direct input to the action');
