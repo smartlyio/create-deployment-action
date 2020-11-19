@@ -65,6 +65,12 @@ export async function runPost(): Promise<void> {
   try {
     core.info(`Executing action post-run stage`)
     const context: Context = await getContext()
+    if (!context.deploymentId) {
+      core.warning(
+        'The deployment creation step seems to have been skipped. Skipping post step.'
+      )
+      return
+    }
     if (context.executionStage !== 'post') {
       // This will happen if the 'main' stage was skipped, e.g. due to
       // an `if:` condition in the workflow.
