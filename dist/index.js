@@ -1481,6 +1481,10 @@ function runPost() {
         try {
             core.info(`Executing action post-run stage`);
             const context = yield context_1.getContext();
+            if (!context.deploymentId) {
+                core.warning('The deployment creation step seems to have been skipped. Skipping post-run stage.');
+                return;
+            }
             if (context.executionStage !== 'post') {
                 // This will happen if the 'main' stage was skipped, e.g. due to
                 // an `if:` condition in the workflow.
