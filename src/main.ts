@@ -67,7 +67,7 @@ export async function runPost(): Promise<void> {
     const context: Context = await getContext()
     if (!context.deploymentId) {
       core.warning(
-        'The deployment creation step seems to have been skipped. Skipping post step.'
+        'The deployment creation step seems to have been skipped. Skipping post-run stage.'
       )
       return
     }
