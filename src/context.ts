@@ -169,6 +169,12 @@ export async function getContext(): Promise<Context> {
   const requiredContexts = core.getInput('required_contexts') || ''
 
   const environmentName: string = core.getInput('environment_name')
+  if (!environmentName) {
+    throw new Error(
+      'Environment name is empty! Did the pre-action stage run before computed inputs are available?'
+    )
+  }
+
   const isProduction: boolean =
     toBoolean(core.getInput('is_production')) ||
     environmentName === 'production' ||
