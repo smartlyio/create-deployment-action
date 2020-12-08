@@ -246,7 +246,41 @@ describe('context', () => {
     await expect(getContext()).rejects.toThrow(/No 'ref' input provided/)
   })
 
-  test('no environment_name input', async () => {
+  test('no environment_name input is allowed during pre stage if pre is skipped', async () => {
+    const mockGetInput = mocked(getInput)
+    const version = 'v0.12.4'
+    mockGetInput.mockImplementation((name: string): string => {
+      switch (name) {
+        case 'version':
+          return version
+        case 'skip_pre_action':
+          return 'true'
+        default:
+          return ''
+      }
+    })
+    const context = await getContext()
+    expect(context.environment.name).toEqual('')
+    expect(context.executionStage).toEqual('pre')
+    expect(context.skipPreAction).toEqual(true)
+  })
+
+  test('no environment_name input is not allowed during pre stage if pre is not skipped', async () => {
+    const mockGetInput = mocked(getInput)
+    const version = 'v0.12.4'
+    mockGetInput.mockImplementation((name: string): string => {
+      switch (name) {
+        case 'version':
+          return version
+        default:
+          return ''
+      }
+    })
+    await expect(getContext()).rejects.toThrow(/Environment name is empty/)
+  })
+
+  test('no environment_name input after pre-stage', async () => {
+    process.env[`STATE_${PRE_HAS_RUN}`] = 'true'
     const mockGetInput = mocked(getInput)
     const version = 'v0.12.4'
     mockGetInput.mockImplementation((name: string): string => {
