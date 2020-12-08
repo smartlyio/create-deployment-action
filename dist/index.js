@@ -5584,8 +5584,10 @@ function getContext() {
         const version = yield getVersion();
         const deploymentId = core.getState('deploymentId');
         const requiredContexts = core.getInput('required_contexts') || '';
+        const skipPreAction = toBoolean(core.getInput('skip_pre_action'));
         const environmentName = core.getInput('environment_name');
-        if (!environmentName) {
+        if (!environmentName &&
+            (stage !== 'pre' || (stage === 'pre' && !skipPreAction))) {
             throw new Error('Environment name is empty! Did the pre-action stage run before computed inputs are available?');
         }
         const isProduction = toBoolean(core.getInput('is_production')) ||
@@ -5601,7 +5603,7 @@ function getContext() {
             environment.url = environmentUrl;
         }
         const context = {
-            skipPreAction: toBoolean(core.getInput('skip_pre_action')),
+            skipPreAction,
             executionStage: stage,
             token: core.getInput('token', { required: true }),
             jobStatus: core.getInput('job_status', { required: true }),

@@ -168,8 +168,12 @@ export async function getContext(): Promise<Context> {
   const deploymentId = core.getState('deploymentId')
   const requiredContexts = core.getInput('required_contexts') || ''
 
+  const skipPreAction: boolean = toBoolean(core.getInput('skip_pre_action'))
   const environmentName: string = core.getInput('environment_name')
-  if (!environmentName) {
+  if (
+    !environmentName &&
+    (stage !== 'pre' || (stage === 'pre' && !skipPreAction))
+  ) {
     throw new Error(
       'Environment name is empty! Did the pre-action stage run before computed inputs are available?'
     )
@@ -190,7 +194,7 @@ export async function getContext(): Promise<Context> {
   }
 
   const context: Context = {
-    skipPreAction: toBoolean(core.getInput('skip_pre_action')),
+    skipPreAction,
     executionStage: stage,
     token: core.getInput('token', {required: true}),
     jobStatus: core.getInput('job_status', {required: true}),
