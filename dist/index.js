@@ -5585,6 +5585,9 @@ function getContext() {
         const deploymentId = core.getState('deploymentId');
         const requiredContexts = core.getInput('required_contexts') || '';
         const environmentName = core.getInput('environment_name');
+        if (!environmentName) {
+            throw new Error('Environment name is empty! Did the pre-action stage run before computed inputs are available?');
+        }
         const isProduction = toBoolean(core.getInput('is_production')) ||
             environmentName === 'production' ||
             !!environmentName.match(/^kube-(prod|intra)\d+$/);

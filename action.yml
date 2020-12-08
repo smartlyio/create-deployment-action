@@ -46,7 +46,7 @@ inputs:
 
       This allows more dynamic setup of the action parameters if they
       need to be determined by another step in the workflow.
-    default: false
+    default: "false"
     required: false
 runs:
   using: 'node12'

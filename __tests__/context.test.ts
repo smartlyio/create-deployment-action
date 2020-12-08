@@ -246,6 +246,20 @@ describe('context', () => {
     await expect(getContext()).rejects.toThrow(/No 'ref' input provided/)
   })
 
+  test('no environment_name input', async () => {
+    const mockGetInput = mocked(getInput)
+    const version = 'v0.12.4'
+    mockGetInput.mockImplementation((name: string): string => {
+      switch (name) {
+        case 'version':
+          return version
+        default:
+          return ''
+      }
+    })
+    await expect(getContext()).rejects.toThrow(/Environment name is empty/)
+  })
+
   test('basic context construction with all inputs', async () => {
     const mockGetInput = mocked(getInput)
     const ref = 'refs/heads/master'
