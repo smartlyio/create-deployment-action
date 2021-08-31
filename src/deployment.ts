@@ -1,9 +1,11 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
+/* eslint-disable import/named */
 import {
   OctokitResponse,
   ReposCreateDeploymentResponseData
 } from '@octokit/types'
+/* eslint-enable */
 import {Context, saveExecutionState, JobStatus} from './context'
 
 export const githubPreviews = [
