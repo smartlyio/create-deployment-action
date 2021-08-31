@@ -74,7 +74,7 @@ describe('pre-build stage', () => {
           )
         }
       )
-      .reply(200, {id: deploymentId})
+      .reply(201, {id: deploymentId})
     const statusScope = nock(GITHUB_API)
       .post(
         `/repos/${context.repo.owner}/${context.repo.name}/deployments/${deploymentId}/statuses`,
@@ -82,7 +82,7 @@ describe('pre-build stage', () => {
           return body.state === 'pending' && body.log_url === context.logUrl
         }
       )
-      .reply(200)
+      .reply(201)
     const mockSaveState = mocked(saveState)
     await createDeployment(context)
 
@@ -128,7 +128,7 @@ describe('main build stage', () => {
           return body.state === 'in_progress'
         }
       )
-      .reply(200)
+      .reply(201)
     const mockSaveState = mocked(saveState)
     await setDeploymentInProgress(context)
 
@@ -172,7 +172,7 @@ describe('post build stage', () => {
           )
         }
       )
-      .reply(200)
+      .reply(201)
     const mockSaveState = mocked(saveState)
     await setDeploymentEnded(context)
 
@@ -193,7 +193,7 @@ describe('post build stage', () => {
           )
         }
       )
-      .reply(200)
+      .reply(201)
     const mockSaveState = mocked(saveState)
     await setDeploymentEnded(context)
 
@@ -214,7 +214,7 @@ describe('post build stage', () => {
           )
         }
       )
-      .reply(200)
+      .reply(201)
     const mockSaveState = mocked(saveState)
     await setDeploymentEnded(context)
 

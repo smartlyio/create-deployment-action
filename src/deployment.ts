@@ -2,11 +2,11 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 import {Context, JobStatus, saveExecutionState} from './context'
 /* eslint-disable import/named */
-import {
-  OctokitResponse,
-  ReposCreateDeploymentResponseData
-} from '@octokit/types'
+import {Endpoints} from '@octokit/types'
 /* eslint-enable */
+
+type ReposCreateDeploymentResponse =
+  Endpoints['POST /repos/{owner}/{repo}/deployments']['response']
 
 export const githubPreviews = [
   'flash', // More deployment statuses
@@ -27,23 +27,29 @@ export async function createDeployment(context: Context): Promise<void> {
   core.info(
     `Creating new deployment for ${owner}/${repo} with ref ${ref} and version ${context.version}`
   )
-  const deployment = (await octokit.repos.createDeployment({
-    owner,
-    repo,
-    ref,
-    environment: context.environment.name,
-    transient_environment: context.environment.isTransient,
-    production_environment: context.environment.isProduction,
-    required_contexts: context.requiredContexts,
-    auto_merge: false,
-    mediaType: {
-      previews: githubPreviews
-    },
-    ...options
-  })) as OctokitResponse<ReposCreateDeploymentResponseData>
-  context.deploymentId = deployment.data.id
-  saveExecutionState(context)
-  await setDeploymentLogUrl(context)
+  const deployment: ReposCreateDeploymentResponse =
+    await octokit.rest.repos.createDeployment({
+      owner,
+      repo,
+      ref,
+      environment: context.environment.name,
+      transient_environment: context.environment.isTransient,
+      production_environment: context.environment.isProduction,
+      required_contexts: context.requiredContexts,
+      auto_merge: false,
+      mediaType: {
+        previews: githubPreviews
+      },
+      ...options
+    })
+
+  if (deployment.status === 201) {
+    context.deploymentId = deployment.data.id
+    saveExecutionState(context)
+    await setDeploymentLogUrl(context)
+  } else {
+    throw new Error(`Unable to create deployment (unknown error occurred)`)
+  }
 }
 
 export async function setDeploymentLogUrl(context: Context): Promise<void> {
@@ -54,7 +60,7 @@ export async function setDeploymentLogUrl(context: Context): Promise<void> {
     )
   }
   core.info(`Setting deployment log url to ${context.logUrl}`)
-  await octokit.repos.createDeploymentStatus({
+  await octokit.rest.repos.createDeploymentStatus({
     owner: context.repo.owner,
     repo: context.repo.name,
     deployment_id: context.deploymentId,
@@ -74,7 +80,7 @@ export async function setDeploymentInProgress(context: Context): Promise<void> {
     )
   }
   core.info('Setting deployment status to in_progress')
-  await octokit.repos.createDeploymentStatus({
+  await octokit.rest.repos.createDeploymentStatus({
     owner: context.repo.owner,
     repo: context.repo.name,
     deployment_id: context.deploymentId,
@@ -105,7 +111,7 @@ export async function setDeploymentEnded(context: Context): Promise<void> {
   }
 
   core.info(`Setting deployment status to ${state}`)
-  await octokit.repos.createDeploymentStatus({
+  await octokit.rest.repos.createDeploymentStatus({
     owner: context.repo.owner,
     repo: context.repo.name,
     deployment_id: context.deploymentId,
