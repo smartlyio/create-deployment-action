@@ -2,8 +2,8 @@ import * as core from '@actions/core'
 import {Context, getContext, saveExecutionState} from './context'
 import {
   createDeployment,
-  setDeploymentInProgress,
-  setDeploymentEnded
+  setDeploymentEnded,
+  setDeploymentInProgress
 } from './deployment'
 
 export async function runPre(): Promise<void> {
