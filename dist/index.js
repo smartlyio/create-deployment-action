@@ -261,7 +261,7 @@ function createDeployment(context) {
             } }, options));
         if (deployment.status === 201) {
             context.deploymentId = deployment.data.id;
-            context_1.saveExecutionState(context);
+            (0, context_1.saveExecutionState)(context);
             yield setDeploymentLogUrl(context);
         }
         else {
@@ -377,7 +377,7 @@ function runPre() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             core.info(`Executing action pre-run stage`);
-            const context = yield context_1.getContext();
+            const context = yield (0, context_1.getContext)();
             if (context.executionStage !== 'pre') {
                 // This could happen if there is an error creating the deployment, and state is not saved.
                 throw new Error(`Unexpected execution stage "${context.executionStage}" when executing pre stage.`);
@@ -386,13 +386,13 @@ function runPre() {
                 core.info(`Skipping action pre-run stage; deployment will be created in the main stage`);
             }
             else {
-                yield deployment_1.createDeployment(context);
+                yield (0, deployment_1.createDeployment)(context);
             }
-            context_1.saveExecutionState(context);
+            (0, context_1.saveExecutionState)(context);
         }
         catch (error) {
-            core.error(error.message);
-            core.setFailed(error.message);
+            core.error(`${error}`);
+            core.setFailed(`${error}`);
         }
     });
 }
@@ -401,23 +401,23 @@ function runMain() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             core.info(`Executing action main stage`);
-            const context = yield context_1.getContext();
+            const context = yield (0, context_1.getContext)();
             if (context.skipPreAction) {
                 if (!['pre', 'main'].includes(context.executionStage)) {
                     throw new Error(`Unexpected execution stage "${context.executionStage}" when executing main stage`);
                 }
                 context.executionStage = 'main';
-                yield deployment_1.createDeployment(context);
+                yield (0, deployment_1.createDeployment)(context);
             }
             if (context.executionStage !== 'main') {
                 throw new Error(`Unexpected execution stage "${context.executionStage}" when executing main stage`);
             }
-            yield deployment_1.setDeploymentInProgress(context);
-            context_1.saveExecutionState(context);
+            yield (0, deployment_1.setDeploymentInProgress)(context);
+            (0, context_1.saveExecutionState)(context);
         }
         catch (error) {
-            core.error(error.message);
-            core.setFailed(error.message);
+            core.error(`${error}`);
+            core.setFailed(`${error}`);
         }
     });
 }
@@ -426,7 +426,7 @@ function runPost() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             core.info(`Executing action post-run stage`);
-            const context = yield context_1.getContext();
+            const context = yield (0, context_1.getContext)();
             if (!context.deploymentId) {
                 core.warning('The deployment creation step seems to have been skipped. Skipping post-run stage.');
                 return;
@@ -437,12 +437,12 @@ function runPost() {
                 context.jobStatus = 'inactive';
                 core.warning('Action main stage not detected to have run. Deploy status set to "inactive"');
             }
-            yield deployment_1.setDeploymentEnded(context);
-            context_1.saveExecutionState(context);
+            yield (0, deployment_1.setDeploymentEnded)(context);
+            (0, context_1.saveExecutionState)(context);
         }
         catch (error) {
-            core.error(error.message);
-            core.setFailed(error.message);
+            core.error(`${error}`);
+            core.setFailed(`${error}`);
         }
     });
 }
