@@ -27,8 +27,8 @@ export async function runPre(): Promise<void> {
     }
     saveExecutionState(context)
   } catch (error) {
-    core.error(error.message)
-    core.setFailed(error.message)
+    core.error(`${error}`)
+    core.setFailed(`${error}`)
   }
 }
 
@@ -56,8 +56,8 @@ export async function runMain(): Promise<void> {
     await setDeploymentInProgress(context)
     saveExecutionState(context)
   } catch (error) {
-    core.error(error.message)
-    core.setFailed(error.message)
+    core.error(`${error}`)
+    core.setFailed(`${error}`)
   }
 }
 
@@ -82,7 +82,7 @@ export async function runPost(): Promise<void> {
     await setDeploymentEnded(context)
     saveExecutionState(context)
   } catch (error) {
-    core.error(error.message)
-    core.setFailed(error.message)
+    core.error(`${error}`)
+    core.setFailed(`${error}`)
   }
 }
