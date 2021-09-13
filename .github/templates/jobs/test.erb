@@ -1,0 +1,15 @@
+test:
+  runs-on: <%= ubuntu_version %>
+  steps:
+  - uses: actions/checkout@v2
+  - name: "Build action for test"
+    run: |
+      npm install
+      npm run all
+      git clean -fXd
+  - name: Create Deployment
+    uses: ./
+    with:
+      token: ${{ github.token }}
+      environment_name: ${{ github.job }}
+      skip_pre_action: true
