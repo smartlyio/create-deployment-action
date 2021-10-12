@@ -1,9 +1,7 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import {Context, JobStatus, saveExecutionState} from './context'
-/* eslint-disable import/named */
 import {Endpoints} from '@octokit/types'
-/* eslint-enable */
 
 type ReposCreateDeploymentResponse =
   Endpoints['POST /repos/{owner}/{repo}/deployments']['response']
