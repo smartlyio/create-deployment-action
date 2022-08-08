@@ -1,6 +1,6 @@
 {
   "name": "create-deployment-action",
-  "version": "2.3.19",
+  "version": "2.3.20",
   "private": true,
   "description": "Github Action to handle deployment creation lifecycle for a workflow job",
   "main": "lib/main.js",
