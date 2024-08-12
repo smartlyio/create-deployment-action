@@ -11,7 +11,7 @@ import {
   MAIN_HAS_RUN,
   DEPLOYMENT_ID
 } from '../src/context'
-import {mocked} from 'ts-jest/utils'
+import {mocked} from 'jest-mock'
 import {getInput, saveState, getState, info} from '@actions/core'
 import * as path from 'path'
 import {promises as fs} from 'fs'
