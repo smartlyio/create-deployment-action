@@ -22,13 +22,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -39,7 +49,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getContext = exports.getVersion = exports.getRef = exports.parseArray = exports.toBoolean = exports.saveExecutionState = exports.executionStage = exports.createLogUrl = exports.DEPLOYMENT_ID = exports.MAIN_HAS_RUN = exports.PRE_HAS_RUN = void 0;
+exports.DEPLOYMENT_ID = exports.MAIN_HAS_RUN = exports.PRE_HAS_RUN = void 0;
+exports.createLogUrl = createLogUrl;
+exports.executionStage = executionStage;
+exports.saveExecutionState = saveExecutionState;
+exports.toBoolean = toBoolean;
+exports.parseArray = parseArray;
+exports.getRef = getRef;
+exports.getVersion = getVersion;
+exports.getContext = getContext;
 const core = __importStar(__nccwpck_require__(2186));
 const fs_1 = __nccwpck_require__(7147);
 exports.PRE_HAS_RUN = 'preHasRun';
@@ -48,7 +66,6 @@ exports.DEPLOYMENT_ID = 'deploymentId';
 function createLogUrl(githubRepository, githubRunId) {
     return `https://github.com/${githubRepository}/actions/runs/${githubRunId}`;
 }
-exports.createLogUrl = createLogUrl;
 function executionStage() {
     const isMain = !!process.env[`STATE_${exports.PRE_HAS_RUN}`];
     const isPost = !!process.env[`STATE_${exports.MAIN_HAS_RUN}`];
@@ -63,7 +80,6 @@ function executionStage() {
     }
     throw new Error('It should not be possible to reach this');
 }
-exports.executionStage = executionStage;
 function saveExecutionState(context) {
     if (['pre', 'main', 'post'].includes(context.executionStage)) {
         core.saveState(exports.PRE_HAS_RUN, 'true');
@@ -75,19 +91,16 @@ function saveExecutionState(context) {
         core.saveState(exports.DEPLOYMENT_ID, JSON.stringify(context.deploymentId));
     }
 }
-exports.saveExecutionState = saveExecutionState;
 function toBoolean(value) {
     const regexp = new RegExp(/^(true|1|on|yes)$/i);
     return regexp.test(value.trim());
 }
-exports.toBoolean = toBoolean;
 function parseArray(value) {
     if (!value.trim()) {
         return [];
     }
     return value.trim().split(/\s+/);
 }
-exports.parseArray = parseArray;
 function getRef() {
     const inputRef = core.getInput('ref');
     if (inputRef) {
@@ -107,7 +120,6 @@ function getRef() {
     }
     return ref;
 }
-exports.getRef = getRef;
 function getVersion() {
     return __awaiter(this, void 0, void 0, function* () {
         const inputVersion = core.getInput('version');
@@ -138,7 +150,6 @@ function getVersion() {
         return sha;
     });
 }
-exports.getVersion = getVersion;
 function getContext() {
     return __awaiter(this, void 0, void 0, function* () {
         const stage = executionStage();
@@ -198,7 +209,6 @@ function getContext() {
         return context;
     });
 }
-exports.getContext = getContext;
 
 
 /***/ }),
@@ -224,13 +234,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -241,7 +261,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.setDeploymentEnded = exports.setDeploymentInProgress = exports.setDeploymentLogUrl = exports.createDeployment = exports.githubPreviews = void 0;
+exports.githubPreviews = void 0;
+exports.createDeployment = createDeployment;
+exports.setDeploymentLogUrl = setDeploymentLogUrl;
+exports.setDeploymentInProgress = setDeploymentInProgress;
+exports.setDeploymentEnded = setDeploymentEnded;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const context_1 = __nccwpck_require__(3842);
@@ -277,7 +301,6 @@ function createDeployment(context) {
         }
     });
 }
-exports.createDeployment = createDeployment;
 function setDeploymentLogUrl(context) {
     return __awaiter(this, void 0, void 0, function* () {
         const octokit = github.getOctokit(context.token);
@@ -297,7 +320,6 @@ function setDeploymentLogUrl(context) {
         });
     });
 }
-exports.setDeploymentLogUrl = setDeploymentLogUrl;
 function setDeploymentInProgress(context) {
     return __awaiter(this, void 0, void 0, function* () {
         const octokit = github.getOctokit(context.token);
@@ -317,7 +339,6 @@ function setDeploymentInProgress(context) {
         });
     });
 }
-exports.setDeploymentInProgress = setDeploymentInProgress;
 function setDeploymentEnded(context) {
     return __awaiter(this, void 0, void 0, function* () {
         const octokit = github.getOctokit(context.token);
@@ -338,7 +359,6 @@ function setDeploymentEnded(context) {
             } }, options));
     });
 }
-exports.setDeploymentEnded = setDeploymentEnded;
 
 
 /***/ }),
@@ -364,13 +384,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -381,7 +411,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.runPost = exports.runMain = exports.runPre = void 0;
+exports.runPre = runPre;
+exports.runMain = runMain;
+exports.runPost = runPost;
 const core = __importStar(__nccwpck_require__(2186));
 const context_1 = __nccwpck_require__(3842);
 const deployment_1 = __nccwpck_require__(2900);
@@ -408,7 +440,6 @@ function runPre() {
         }
     });
 }
-exports.runPre = runPre;
 function runMain() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -433,7 +464,6 @@ function runMain() {
         }
     });
 }
-exports.runMain = runMain;
 function runPost() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -458,7 +488,6 @@ function runPost() {
         }
     });
 }
-exports.runPost = runPost;
 
 
 /***/ }),
