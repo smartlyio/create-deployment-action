@@ -4,10 +4,7 @@
   ],
   "lockFileMaintenance": {
     "enabled": true,
-    "labels": [
-      "patch",
-      "renovate-deps"
-    ]
+    "labels": ["patch", "renovate-deps"]
   },
   "vulnerabilityAlerts": {
     "enabled": true
@@ -57,77 +54,50 @@
     },
     {
       "groupName": "dependencies",
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "depTypeList": [
-        "dependencies"
-      ],
-      "labels": [
-        "minor",
-        "renovate-deps"
-      ]
+      "matchUpdateTypes": ["major"],
+      "matchDepTypes": ["dependencies"],
+      "labels": ["minor", "renovate-deps"]
     },
     {
       "groupName": "dependencies",
-      "matchUpdateTypes": [
-        "patch",
-        "minor"
-      ],
-      "depTypeList": [
-        "dependencies"
-      ],
-      "labels": [
-        "patch",
-        "renovate-deps"
-      ]
+      "matchUpdateTypes": ["patch", "minor"],
+      "matchDepTypes": ["dependencies"],
+      "labels": ["patch", "renovate-deps"]
     },
     {
-      "depTypeList": [
-        "devDependencies"
-      ],
-      "matchPackageNames": [
-        "@vercel/ncc"
-      ],
-      "labels": [
-        "patch",
-        "renovate-deps"
-      ]
+      "matchDepTypes": ["devDependencies"],
+      "matchPackageNames": ["@vercel/ncc"],
+      "labels": ["patch", "renovate-deps"]
     },
     {
-      "depTypeList": [
-        "devDependencies"
-      ],
-      "matchPackageNames": [
-        "typescript"
-      ],
-      "matchUpdateTypes": [
-        "minor"
-      ],
-      "labels": [
-        "no release",
-        "renovate-deps"
-      ]
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "labels": ["no release", "renovate-deps"],
+      "automerge": true,
+      "matchPackageNames": ["!@vercel/ncc", "!typescript"]
     },
     {
-      "depTypeList": [
-        "devDependencies"
-      ],
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "labels": [
-        "patch",
-        "renovate-deps"
-      ]
+      "matchDepTypes": ["devDependencies"],
+      "matchPackageNames": ["typescript"],
+      "matchUpdateTypes": ["patch"],
+      "labels": ["no release", "renovate-deps"],
+      "automerge": true
+    },
+    {
+      "matchDepTypes": ["devDependencies"],
+      "matchPackageNames": ["typescript"],
+      "matchUpdateTypes": ["minor"],
+      "labels": ["no release", "renovate-deps"]
+    },
+    {
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["major"],
+      "labels": ["patch", "renovate-deps"]
     }
   ],
   "github-actions": {
     "enabled": true,
-    "labels": [
-      "no release",
-      "renovate-deps"
-    ],
+    "labels": ["no release", "renovate-deps"],
     "automerge": true
   },
   "minimumReleaseAge": "30 days"
