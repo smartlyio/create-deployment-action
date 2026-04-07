@@ -14,6 +14,48 @@
   },
   "packageRules": [
     {
+      "depTypeList": [
+        "devDependencies"
+      ],
+      "excludePackageNames": [
+        "@vercel/ncc",
+        "typescript"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
+      "labels": [
+        "no release",
+        "renovate-deps"
+      ],
+      "automerge": true
+    },
+    {
+      "depTypeList": [
+        "devDependencies"
+      ],
+      "matchPackageNames": [
+        "typescript"
+      ],
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "labels": [
+        "no release",
+        "renovate-deps"
+      ],
+      "automerge": true
+    },
+    {
+      "matchUpdateTypes": [
+        "pin",
+        "pinDigest"
+      ],
+      "minimumReleaseAge": null,
+      "automerge": true
+    },
+    {
       "groupName": "dependencies",
       "matchUpdateTypes": [
         "major"
@@ -51,40 +93,6 @@
         "patch",
         "renovate-deps"
       ]
-    },
-    {
-      "depTypeList": [
-        "devDependencies"
-      ],
-      "excludePackageNames": [
-        "@vercel/ncc",
-        "typescript"
-      ],
-      "matchUpdateTypes": [
-        "patch",
-        "minor"
-      ],
-      "labels": [
-        "no release",
-        "renovate-deps"
-      ],
-      "automerge": true
-    },
-    {
-      "depTypeList": [
-        "devDependencies"
-      ],
-      "matchPackageNames": [
-        "typescript"
-      ],
-      "matchUpdateTypes": [
-        "patch"
-      ],
-      "labels": [
-        "no release",
-        "renovate-deps"
-      ],
-      "automerge": true
     },
     {
       "depTypeList": [
