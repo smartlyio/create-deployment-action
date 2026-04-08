@@ -1,5 +1,7 @@
 {
-  "extends": ["config:recommended"],
+  "extends": [
+    "config:best-practices"
+  ],
   "lockFileMaintenance": {
     "enabled": true,
     "labels": ["patch", "renovate-deps"]
@@ -8,6 +10,14 @@
     "enabled": true
   },
   "packageRules": [
+    {
+      "matchUpdateTypes": [
+        "pin",
+        "pinDigest"
+      ],
+      "minimumReleaseAge": null,
+      "automerge": true
+    },
     {
       "groupName": "dependencies",
       "matchUpdateTypes": ["major"],
@@ -55,5 +65,6 @@
     "enabled": true,
     "labels": ["no release", "renovate-deps"],
     "automerge": true
-  }
+  },
+  "minimumReleaseAge": "30 days"
 }
