@@ -56,9 +56,8 @@
       "labels": ["no release", "renovate-deps"]
     },
     {
-      "matchDepTypes": ["devDependencies"],
-      "matchUpdateTypes": ["major"],
-      "labels": ["patch", "renovate-deps"]
+      "matchPackageNames": ["@types/node"],
+      "labels": ["no release", "renovate-deps"]
     }
   ],
   "github-actions": {
