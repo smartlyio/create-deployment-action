@@ -65,12 +65,6 @@
       "matchManagers": ["github-actions"],
       "matchPackageNames": ["/^smartlyio\\//"],
       "pinDigests": false
-    },
-    {
-      "matchPackageNames": ["/^@smartly//"],
-      "groupName": "Smartly packages",
-      "addLabels": ["smartlyPackages"],
-      "minimumReleaseAge": null
     }
   ],
   "github-actions": {
