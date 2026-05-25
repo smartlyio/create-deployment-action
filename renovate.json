@@ -1,20 +1,14 @@
 {
   "extends": [
-    "config:best-practices"
+    "github>smartlyio/renovate-config:security-base"
   ],
   "lockFileMaintenance": {
     "enabled": true,
     "labels": ["patch", "renovate-deps"]
   },
-  "vulnerabilityAlerts": {
-    "enabled": true
-  },
   "packageRules": [
     {
-      "matchUpdateTypes": [
-        "pin",
-        "pinDigest"
-      ],
+      "matchUpdateTypes": ["pin", "pinDigest"],
       "minimumReleaseAge": null,
       "automerge": true
     },
@@ -59,18 +53,6 @@
       "matchDepTypes": ["devDependencies"],
       "matchUpdateTypes": ["major"],
       "labels": ["patch", "renovate-deps"]
-    },
-    {
-      "description": "Pin third-party GitHub Actions to digest SHAs only; Smartly-owned actions stay tag-based (after catch-all pin rules so pinDigests is not overridden)",
-      "matchManagers": ["github-actions"],
-      "matchPackageNames": ["/^smartlyio\\//"],
-      "pinDigests": false
-    },
-    {
-      "matchPackageNames": ["/^@smartly//"],
-      "groupName": "Smartly packages",
-      "addLabels": ["smartlyPackages"],
-      "minimumReleaseAge": null
     }
   ],
   "github-actions": {
